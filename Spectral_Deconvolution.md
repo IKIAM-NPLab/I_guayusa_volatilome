@@ -9,11 +9,9 @@ Edison Gonzales , Jefferson Pastuna
   package workflow</a>
 
 ### Introduction
-
 En los últimos años se han venido desarrollado tecnologías basadas en espectrometría de masas que han permitido dar un auge a la metabolómica, un ejemplo claro es la cromatografía gaseosa acoplada a espectrometría de masas GC-MS, técnica que permite el análisis de metabos de sustancias volátiles y semi volátiles. La base dicha técnica es la ionización a partir de 70v. 
 Este proceso de ionización en GC es altamente reproducible sin embargo la coelución de muestras complejas junto a la extensa fragmentación de iones da como resultado un conjunto de datos grandes y complejos, unido también a la falta de herramientas computacionales integradas a la metabolómica no dirigida en GC-MS dificulta en gran medida en la identificación y cuantificación de metabolitos. 
 El análisis de datos de GC-MS se divide en dos categorías principales, la primera es “peak-picking”, que implica la desconvolución para fragmentar e identificar los picos más relevantes en los espectros entre diferentes muestras, permitiéndonos descubrir variaciones estadísticas en los picos entre grupos experimentales. Las herramientas que permiten este tipo de procesamiento de datos son MZmine,MetAligny XCMS. Sin embargo, estos métodos no se basan en los espectros de los compuestos, sino en el valor m/z el tiempo de retención y el área de los picos de iones fragmentados. Lo que ocasiona dificultad en la identificación de los compuestos. 
-
 La segunda categoría se basa en la cuantificación e identificación mediante procesos de descovolucion multivariable que extrae y construye compuestos puros a partir de datos brutos. Las herramientas aplicadas para este proceso son TNO-DECO o ADAP-GC.
 
 
