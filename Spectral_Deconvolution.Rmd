@@ -1,6 +1,6 @@
 ---
 title: "Spectral_Deconvolution"
-author: "Ayudante de investigaciOn, Jefferson Pastuna"
+author: Edison Gonzales, Jefferson Pastuna"
 date: "2024-06-09"
 output:
   github_document:
@@ -17,11 +17,14 @@ usethis::git_vaccinate()
 
 ### Introduction
 
-Write an Introduction.
+En los últimos años se han venido desarrollado tecnologías basadas en espectrometría de masas que han permitido dar un auge a la metabolómica, un ejemplo claro es la cromatografía gaseosa acoplada a espectrometría de masas GC-MS, técnica que permite el análisis de metabos de sustancias volátiles y semi volátiles. La base dicha técnica es la ionización a partir de 70v. 
+Este proceso de ionización en GC es altamente reproducible sin embargo la coelución de muestras complejas junto a la extensa fragmentación de iones da como resultado un conjunto de datos grandes y complejos, unido también a la falta de herramientas computacionales integradas a la metabolómica no dirigida en GC-MS dificulta en gran medida en la identificación y cuantificación de metabolitos. 
+El análisis de datos de GC-MS se divide en dos categorías principales, la primera es “peak-picking”, que implica la desconvolución para fragmentar e identificar los picos más relevantes en los espectros entre diferentes muestras, permitiéndonos descubrir variaciones estadísticas en los picos entre grupos experimentales. Las herramientas que permiten este tipo de procesamiento de datos son MZmine,MetAligny XCMS. Sin embargo, estos métodos no se basan en los espectros de los compuestos, sino en el valor m/z el tiempo de retención y el área de los picos de iones fragmentados. Lo que ocasiona dificultad en la identificación de los compuestos. 
+La segunda categoría se basa en la cuantificación e identificación mediante procesos de descovolucion multivariable que extrae y construye compuestos puros a partir de datos brutos. Las herramientas aplicadas para este proceso son TNO-DECO o ADAP-GC. De igual forma existen sofwares libres como AMDIS or BinBase cada uno de estos sofwares representan limitaciones especificas que impide un análisis amplio de la data obtenida por medio del GC-MS.
+Por ende, a base de las limitaciones y parámetros a seguir, se han desarrollado softwares que permiten un análisis amplio y preciso de los datos. Entre ellos destaca eRah, un software gratuito y de código abierto diseñado para procesar datos en metabolómica no dirigida basada en GC-MS. Este paquete de R se basa en la deconvolución central, centrándose principalmente en la separación ciega de fuentes (BSS), la cuantificación y la identificación automatizada de espectros de muestra mediante la comparación con bibliotecas espectrales.
 
 ### Before to start
-
-Write a package description.
+eRah, es un paquete de R gratuito el cual incorpora un método de deconvulcion central, de modo que utiliza técnicas multivariadas las cuales se basan en la separación ciega de fuentes  (BSS) el cual es un proceso que permite la alineación, cuantificación y la identificación de metabolitos a través de la comparación de bibliotecas espectrales, lo que a su vez, permite la obtención de una tabla con los nombres de los compuestos, las puntuaciones de coincidencia y el área integrada del compuesto para cada muestra.
 
 ### eRah package workflow
 
