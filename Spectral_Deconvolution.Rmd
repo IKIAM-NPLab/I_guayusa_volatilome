@@ -84,7 +84,7 @@ plan(future::multisession,
 
 ```
 
-Deconvolution
+Procedemos a la desconvolución de compuestos en los datos experimentales (raw_data) utilizando los parámetros especificados en "dec_par" los resultados obtenidos seran guardados en (dec_par).
 
 ```{r echo=TRUE, warning=FALSE}
 
