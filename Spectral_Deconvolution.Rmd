@@ -27,8 +27,8 @@ Por ende, a base de las limitaciones y parámetros a seguir, se han desarrollado
 eRah, es un paquete de R gratuito el cual incorpora un método de deconvulcion central, de modo que utiliza técnicas multivariadas las cuales se basan en la separación ciega de fuentes  (BSS) el cual es un proceso que permite la alineación, cuantificación y la identificación de metabolitos a través de la comparación de bibliotecas espectrales, lo que a su vez, permite la obtención de una tabla con los nombres de los compuestos, las puntuaciones de coincidencia y el área integrada del compuesto para cada muestra.
 
 ### eRah package workflow
+Se procede a instalar y cargar el paquete eRah, usando  "lirary (erah)"
 
-How to star.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 
@@ -36,10 +36,10 @@ How to star.
 #install.packages('erah')
 # eRah library call
 library(erah)
-
 ```
 
-Folder files
+Acontinuamos eliminar archivos no deseados en un directorio especifico y creando un directorio con los archivos deceados, organizando asi nuestro espacio de trabajo. 
+
 
 ```{r echo=TRUE}
 
@@ -50,7 +50,7 @@ createdt('Data/Data_to_eRah/')
 
 ```
 
-New experiment.
+Se procede a cargar y procesar datos de dos archivos CSV, creando un objeto de experimento que contiene estos datos, etiquetado con información relevante para el estudio del volatiloma de I. guayusa.
 
 
 ```{r echo=TRUE}
@@ -64,9 +64,7 @@ raw_data <- newExp(instrumental = instrumental,
 
 ```
 
-Compound deconvolution
-
-Parameter
+Se especifica los parámetros para la desconvolución de compuestos, definiendo criterios específicos sobre el ancho y la altura mínima de los picos, el umbral de ruido y excluyendo ciertos rangos de valores m/z del procesamiento para mejorar la precisión y relevancia del análisis químico.
 
 ```{r echo=TRUE}
 
@@ -77,7 +75,7 @@ dec_par <- setDecPar(min.peak.width = 3,
 
 ```
 
-parallel processing
+Para realizar un proceso en paralelo usamos el paquete "future", el cual permite ejecutar tareas en paralelo,mejorando eficiencia y velocidad de procesamiento de forma simultanea. 
 
 ```{r echo=TRUE}
 
