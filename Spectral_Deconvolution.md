@@ -9,19 +9,18 @@ Edison Gonzales , Jefferson Pastuna
   package workflow</a>
 
 ### Introduction
-En los últimos años se han venido desarrollado tecnologías basadas en espectrometría de masas que han permitido dar un auge a la metabolómica, un ejemplo claro es la cromatografía gaseosa acoplada a espectrometría de masas GC-MS, técnica que permite el análisis de metabos de sustancias volátiles y semi volátiles. La base dicha técnica es la ionización a partir de 70v. 
-Este proceso de ionización en GC es altamente reproducible sin embargo la coelución de muestras complejas junto a la extensa fragmentación de iones da como resultado un conjunto de datos grandes y complejos, unido también a la falta de herramientas computacionales integradas a la metabolómica no dirigida en GC-MS dificulta en gran medida en la identificación y cuantificación de metabolitos. 
-El análisis de datos de GC-MS se divide en dos categorías principales, la primera es “peak-picking”, que implica la desconvolución para fragmentar e identificar los picos más relevantes en los espectros entre diferentes muestras, permitiéndonos descubrir variaciones estadísticas en los picos entre grupos experimentales. Las herramientas que permiten este tipo de procesamiento de datos son MZmine,MetAligny XCMS. Sin embargo, estos métodos no se basan en los espectros de los compuestos, sino en el valor m/z el tiempo de retención y el área de los picos de iones fragmentados. Lo que ocasiona dificultad en la identificación de los compuestos. 
-La segunda categoría se basa en la cuantificación e identificación mediante procesos de descovolucion multivariable que extrae y construye compuestos puros a partir de datos brutos. Las herramientas aplicadas para este proceso son TNO-DECO o ADAP-GC. De igual forma existen sofwares libres como AMDIS or BinBase cada uno de estos sofwares representan limitaciones especificas que impide un análisis amplio de la data obtenida por medio del GC-MS.
-Por ende, a base de las limitaciones y parámetros a seguir, se han desarrollado softwares que permiten un análisis amplio y preciso de los datos. Entre ellos destaca eRah, un software gratuito y de código abierto diseñado para procesar datos en metabolómica no dirigida basada en GC-MS. Este paquete de R se basa en la deconvolución central, centrándose principalmente en la separación ciega de fuentes (BSS), la cuantificación y la identificación automatizada de espectros de muestra mediante la comparación con bibliotecas espectrales.
+Metabolomics has been driven by mass spectrometry technologies such as gas chromatography coupled to mass spectrometry (GC-MS), allowing it to take an important role in recent years. However, it has been facing challenges in the identification and quantification of metabolites due to the coelution of complex samples and fragmentation of ions, nevertheless, techniques have been developed that allow the analysis of GC-MS data such as "peak-picking" and multivariate deconvolution.(Domingo-Almenara et al., 2016)
+Tools such as MZmine, MetAlign and XCMS are used for data processing, but their focus on m/z values and fragmented peak areas makes accurate compound identification difficult. On the other hand, TNO-DECO and ADAP-GC focus on quantification and identification of metabolites from raw data.(Domingo-Almenara et al., 2016)
+Therefore, based on the limitations and parameters to be followed, software has been developed that allows a comprehensive and accurate analysis of the data. These include eRah, a free and open source software designed to process data in untargeted GC-MS-based metabolomics. This R package is based on central deconvolution, focusing on blind source separation (BSS), quantification and automated identification of sample spectra by comparison with spectral libraries.(Domingo-Almenara et al., 2016)
 
 ### Before to start
-eRah, es un paquete de R gratuito el cual incorpora un método de deconvulcion central, de modo que utiliza técnicas multivariadas las cuales se basan en la separación ciega de fuentes  (BSS) el cual es un proceso que permite la alineación, cuantificación y la identificación de metabolitos a través de la comparación de bibliotecas espectrales, lo que a su vez, permite la obtención de una tabla con los nombres de los compuestos, las puntuaciones de coincidencia y el área integrada del compuesto para cada muestra.
+eRah is a free R package which incorporates a central deconvolution method, so it uses multivariate techniques based on blind source separation (BSS) which is a process that allows the alignment, quantification and identification of metabolites through the comparison of spectral libraries, which in turn, allows obtaining a table with the names of the compounds, the matching scores and the integrated area of the compound for each sample.(Domingo-Almenara et al., 2016)
+The table shows the compound names, coincidence scores and the integrated area of the compound for each sample.
+
 
 ### eRah package workflow
 
-How to star.
-
+The eRah package is installed and loaded, using "lirary (erah)".
 ``` r
 # eRah package installation
 #install.packages('erah')
@@ -29,8 +28,7 @@ How to star.
 library(erah)
 ```
 
-Folder files
-
+Delete unwanted files in a specific directory and create a directory with the desired files. 
 ``` r
 # Delete all file that are not in folders
 unlink('Data/Data_to_eRah/*')
@@ -38,7 +36,7 @@ unlink('Data/Data_to_eRah/*')
 createdt('Data/Data_to_eRah/')
 ```
 
-New experiment.
+Data from two CSV files is loaded and processed, creating an experiment object containing this data, tagged with relevant information for the study of the volatilloma of I. guayusa
 
 ``` r
 instrumental <- read.csv('Data/Metadata_to_eRah/Metadata_inst.csv')
@@ -49,9 +47,8 @@ raw_data <- newExp(instrumental = instrumental,
                    info = 'I. guayusa volatilome')
 ```
 
-Compound deconvolution
+Parameters for composite deconvolution are specified, defining specific criteria on peak width and minimum height, noise threshold, and excluding certain ranges of m/z values from processing to improve the accuracy and relevance of chemical analysis.
 
-Parameter
 
 ``` r
 dec_par <- setDecPar(min.peak.width = 3,
@@ -60,14 +57,14 @@ dec_par <- setDecPar(min.peak.width = 3,
                      avoid.processing.mz = c(50:69,73:75,147:149))
 ```
 
-parallel processing
-
+To carry out a process in parallel we use the "future" package, which allows us to execute tasks in parallel, improving efficiency and processing speed simultaneously.
 ``` r
 plan(future::multisession,
      workers = 14)
 ```
 
-Deconvolution
+We proceed to the deconvolution of compounds in the experimental data (raw_data) using the parameters specified in "dec_par" the results obtained will be saved in (dec_par).
+
 
 ``` r
 dec_data <- deconvolveComp(raw_data,
@@ -379,7 +376,7 @@ dec_data <- deconvolveComp(raw_data,
 
     ## Compounds deconvolved
 
-Alignment
+Parameters are defined for alignment and applied to the data.
 
 ``` r
 # Alignment parameters
@@ -391,7 +388,8 @@ peak_alig <- alignComp(dec_data,
                        alParameters = alig_par)
 ```
 
-Missing compound recovery
+By means of the "recMissComp" function it is used to recover missing compounds in spectral data, which allows the general model to be adjusted to the compounds present in a minimum number of samples and can consider the spectra of samples where the compound is missing to obtain the final average spectrum.
+
 
 ``` r
 peak_find <- recMissComp(peak_alig,
