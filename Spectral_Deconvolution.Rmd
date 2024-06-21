@@ -54,9 +54,12 @@ Data from two CSV files is loaded and processed, creating an experiment object c
 
 ```{r echo=TRUE}
 
-instrumental <- read.csv('Data/Metadata_to_eRah/Metadata_inst.csv')
-phenotype <- read.csv('Data/Metadata_to_eRah/Metadata_pheno.csv')
-
+# Loading (*.mzXML) chromatograms
+#phenotype <- read.csv('Data/Metadata_to_eRah/Metadata_pheno_mzXML.csv')
+# If (*.mzXML) did not work
+# Loading (*.CDF) chromatograms
+instrumental <- read.csv('Data/Metadata_to_eRah/Metadata_inst_CDF.csv')
+# Merge of metadata information with chromatograms
 raw_data <- newExp(instrumental = instrumental,
                    phenotype = phenotype,
                    info = 'I. guayusa volatilome')
@@ -80,7 +83,7 @@ To carry out a process in parallel we use the "future" package, which allows us 
 ```{r echo=TRUE}
 
 plan(future::multisession,
-     workers = 5)
+     workers = 15)
 
 ```
 
