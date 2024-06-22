@@ -126,12 +126,12 @@ Identification
 ```{r echo=TRUE, warning=FALSE}
 
 # Loading NIST 20 (*.msp) library
-nist.database <- importMSP(filename = "E:/NIST_20_Library/Result/NIST20EI_2eRah.MSP",
-                           DB.name = "NIST",
-                           DB.version = "NIST20",
-                           DB.info = "NIST MS Search Export")
+#nist.database <- importMSP(filename = "E:/NIST_20_Library/Result/NIST20EI_2eRah.MSP",
+#                           DB.name = "NIST",
+#                           DB.version = "NIST20",
+#                           DB.info = "NIST MS Search Export")
 # Save library for a posterior faster loading
-save(nist.database, file= "E:/NIST_20_Library/Result/NIST20EI_2eRah.rda")
+#save(nist.database, file= "E:/NIST_20_Library/Result/NIST20EI_2eRah.rda")
 # Load R library
 load("E:/NIST_20_Library/Result/NIST20EI_2eRah.rda")
 mslib <- nist.database
@@ -147,6 +147,10 @@ write.csv(id_list,
           file = "Result/eRah_Result/NIST_Identification.csv")
 
 ```
+
+### Identification
+
+How many metabolites were identified?
 
 Mirror plot of identified compounds
 
