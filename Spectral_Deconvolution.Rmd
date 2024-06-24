@@ -148,9 +148,21 @@ write.csv(id_list,
 
 ```
 
-### Identification
+### Cleaning the identification list
 
 How many metabolites were identified?
+How we are clean the identified compound list?
+
+Peak of AlignID number 1
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 1)
+# Visual inspection
+# Low quality peak shape
+
+
+```
 
 Mirror plot of identified compounds
 
