@@ -55,10 +55,12 @@ Data from two CSV files is loaded and processed, creating an experiment object c
 ```{r echo=TRUE}
 
 # Loading (*.mzXML) chromatograms
-#phenotype <- read.csv('Data/Metadata_to_eRah/Metadata_pheno_mzXML.csv')
+#instrumental <- read.csv('Data/Metadata_to_eRah/Metadata_inst_mzXML.csv')
 # If (*.mzXML) did not work
 # Loading (*.CDF) chromatograms
 instrumental <- read.csv('Data/Metadata_to_eRah/Metadata_inst_CDF.csv')
+# Loading metadata of the chromatograms
+phenotype <- read.csv('Data/Metadata_to_eRah/Metadata_pheno.csv')
 # Merge of metadata information with chromatograms
 raw_data <- newExp(instrumental = instrumental,
                    phenotype = phenotype,
@@ -140,11 +142,11 @@ peak_iden <- identifyComp(peak_find,
                           id.database = mslib,
                           mz.range = NULL,
                           n.putative = 20)
-# Identified compound
+# Identified compounds list
 id_list <- idList(peak_iden)
-# Exporting identified compounds
-write.csv(id_list,
-          file = "Result/eRah_Result/NIST_Identification.csv")
+# Exporting identified compounds list
+#write.csv(id_list,
+#          file = "Result/eRah_Result/NIST_Identification.csv")
 
 ```
 
@@ -158,9 +160,8 @@ Peak of AlignID number 1
 ```{r echo=TRUE}
 
 plotProfile(peak_iden, 1)
-# Visual inspection
+# Visual inspection:
 # Low quality peak shape
-
 
 ```
 
