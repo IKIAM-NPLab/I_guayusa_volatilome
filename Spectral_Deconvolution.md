@@ -10,6 +10,7 @@ Edison Gonzales, Jefferson Pastuna”
 - <a href="#cleaning-the-identification-list"
   id="toc-cleaning-the-identification-list">Cleaning the identification
   list</a>
+- <a href="#tiglic-acid" id="toc-tiglic-acid">Tiglic acid</a>
 
 ### Introduction
 
@@ -484,26 +485,73 @@ id_list <- idList(peak_iden)
 How many metabolites were identified? How we are clean the identified
 compound list?
 
+Installation of R package to calculate linear retention index (RI).
+
+``` r
+# Installation of "MetaboCoreUtils" package
+#install.packages("remotes")
+#remotes::install_github("rformassspectrometry/MetaboCoreUtils")
+
+# Loading "MetaboCoreUtils" library
+library("MetaboCoreUtils")
+```
+
+Explain how retention time of n-alkanes was extract?
+
+Read of retention time list of n-alkanes
+
+``` r
+# Loadding rt of each n-alkane
+rti <- data.frame(rtime = c(7.557, 10.006, 12.569, 15.111, 17.581, 19.937,
+                            22.190, 24.338, 26.399, 28.813, 32.000, 36.327,
+                            39.949, 42.506, 44.557, 46.309, 47.852, 49.257,
+                            50.554, 51.781, 52.936, 54.182, 55.604),
+                  rindex = c(1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800,
+                             1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600,
+                             2700, 2800, 2900, 3000, 3100, 3200, 3300))
+```
+
 Peak of AlignID number 1
 
 ``` r
 plotProfile(peak_iden, 1)
 ```
 
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 # Visual inspection:
-# Low quality peak shape
+# Low quality peak
 ```
 
-Mirror plot of identified compounds
+# Tiglic acid
+
+Peak of AlignID number 44
 
 ``` r
-plotSpectra(peak_iden, 1, 1, draw.color = "red")
+plotProfile(peak_iden, 44)
 ```
 
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+# Visual inspection:
+# Good peak shape
+```
+
+Mirror plot of alignID number 44
+
+``` r
+plotSpectra(peak_iden, 44, 4, draw.color = "red", xlim = c(50,110))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+``` r
+# Experimental RI = 959 (Calculated by GCMSsolution software)
+# Literature RI = 941 (NIST#: 150619)
+# ΔRI = 18
+```
 
 Exporting spectra to NIST identification
 

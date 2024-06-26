@@ -1,6 +1,6 @@
 ---
 title: "Spectral_Deconvolution"
-author: Edison Gonzales, Jefferson Pastuna"
+author: "Edison Gonzales, Jefferson Pastuna"
 date: "2024-06-09"
 output:
   github_document:
@@ -168,6 +168,23 @@ library("MetaboCoreUtils")
 
 ```
 
+Explain how retention time of n-alkanes was extract?
+
+Read of retention time list of n-alkanes
+
+```{r echo=TRUE}
+
+# Loadding rt of each n-alkane
+rti <- data.frame(rtime = c(7.557, 10.006, 12.569, 15.111, 17.581, 19.937,
+                            22.190, 24.338, 26.399, 28.813, 32.000, 36.327,
+                            39.949, 42.506, 44.557, 46.309, 47.852, 49.257,
+                            50.554, 51.781, 52.936, 54.182, 55.604),
+                  rindex = c(1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800,
+                             1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600,
+                             2700, 2800, 2900, 3000, 3100, 3200, 3300))
+
+```
+
 Peak of AlignID number 1
 
 ```{r echo=TRUE}
@@ -177,6 +194,8 @@ plotProfile(peak_iden, 1)
 # Low quality peak
 
 ```
+
+# Tiglic acid
 
 Peak of AlignID number 44
 
@@ -192,7 +211,10 @@ Mirror plot of  alignID number 44
 
 ```{r echo=TRUE}
 
-plotSpectra(peak_iden, 44, 1, draw.color = "red")
+plotSpectra(peak_iden, 44, 4, draw.color = "red", xlim = c(50,110))
+# Experimental RI = 959 (Calculated by GCMSsolution software)
+# Literature RI = 941 (NIST#: 150619)
+# ΔRI = 18
 
 ```
 
