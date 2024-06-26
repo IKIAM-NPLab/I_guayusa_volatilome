@@ -155,21 +155,44 @@ id_list <- idList(peak_iden)
 How many metabolites were identified?
 How we are clean the identified compound list?
 
+Installation of R package to calculate linear retention index (RI).
+
+```{r echo=TRUE}
+
+# Installation of "MetaboCoreUtils" package
+#install.packages("remotes")
+#remotes::install_github("rformassspectrometry/MetaboCoreUtils")
+
+# Loading "MetaboCoreUtils" library
+library("MetaboCoreUtils")
+
+```
+
 Peak of AlignID number 1
 
 ```{r echo=TRUE}
 
 plotProfile(peak_iden, 1)
 # Visual inspection:
-# Low quality peak shape
+# Low quality peak
 
 ```
 
-Mirror plot of identified compounds
+Peak of AlignID number 44
 
 ```{r echo=TRUE}
 
-plotSpectra(peak_iden, 1, 1, draw.color = "red")
+plotProfile(peak_iden, 44)
+# Visual inspection:
+# Good peak shape
+
+```
+
+Mirror plot of  alignID number 44
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 44, 1, draw.color = "red")
 
 ```
 
