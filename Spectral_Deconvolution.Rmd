@@ -15,19 +15,19 @@ usethis::git_vaccinate()
 
 ```
 
-### Introduction
+# Introduction
 
 Metabolomics has been driven by mass spectrometry technologies such as gas chromatography coupled to mass spectrometry (GC-MS), allowing it to take an important role in recent years. However, it has been facing challenges in the identification and quantification of metabolites due to the coelution of complex samples and fragmentation of ions, nevertheless, techniques have been developed that allow the analysis of GC-MS data such as "peak-picking" and multivariate deconvolution.(Domingo-Almenara et al., 2016)
 Tools such as MZmine, MetAlign and XCMS are used for data processing, but their focus on m/z values and fragmented peak areas makes accurate compound identification difficult. On the other hand, TNO-DECO and ADAP-GC focus on quantification and identification of metabolites from raw data.(Domingo-Almenara et al., 2016)
 Therefore, based on the limitations and parameters to be followed, software has been developed that allows a comprehensive and accurate analysis of the data. These include eRah, a free and open source software designed to process data in untargeted GC-MS-based metabolomics. This R package is based on central deconvolution, focusing on blind source separation (BSS), quantification and automated identification of sample spectra by comparison with spectral libraries.(Domingo-Almenara et al., 2016)
 
-### Before to start
+# Before to start
 eRah is a free R package which incorporates a central deconvolution method, so it uses multivariate techniques based on blind source separation (BSS) which is a process that allows the alignment, quantification and identification of metabolites through the comparison of spectral libraries, which in turn, allows obtaining a table with the names of the compounds, the matching scores and the integrated area of the compound for each sample.
 The table shows the compound names, coincidence scores and the integrated area of the compound for each sample.
 
-### eRah package workflow
-The eRah package is installed and loaded, using "lirary (erah)".
+# eRah package workflow
 
+The eRah package is installed and loaded, using "lirary (erah)".
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 
@@ -39,7 +39,6 @@ library(erah)
 
 Delete unwanted files in a specific directory and create a directory with the desired files. 
 
-
 ```{r echo=TRUE}
 
 # Delete all file that are not in folders
@@ -50,7 +49,6 @@ createdt('Data/Data_to_eRah/')
 ```
 
 Data from two CSV files is loaded and processed, creating an experiment object containing this data, tagged with relevant information for the study of the volatilloma of I. guayusa.
-
 
 ```{r echo=TRUE}
 
@@ -70,13 +68,15 @@ raw_data <- newExp(instrumental = instrumental,
 
 Parameters for composite deconvolution are specified, defining specific criteria on peak width and minimum height, noise threshold, and excluding certain ranges of m/z values from processing to improve the accuracy and relevance of chemical analysis.
 
+## Compound Deconvolution
 
 ```{r echo=TRUE}
 
 dec_par <- setDecPar(min.peak.width = 3,
                      min.peak.height = 500,
                      noise.threshold = 50,
-                     avoid.processing.mz = c(50:69,73:75,147:149))
+                     avoid.processing.mz = c(50:69,73:75,147:149),
+                     analysis.time = c(3.1,50))
 
 ```
 
@@ -85,7 +85,7 @@ To carry out a process in parallel we use the "future" package, which allows us 
 ```{r echo=TRUE}
 
 plan(future::multisession,
-     workers = 15)
+     workers = 14)
 
 ```
 
@@ -98,20 +98,24 @@ dec_data <- deconvolveComp(raw_data,
                            dec_par)
 
 ```
-Parameters are defined for alignment and applied to the data.
 
+## Alignment
+
+Parameters are defined for alignment and applied to the data.
 
 ```{r echo=TRUE}
 
 # Alignment parameters
 alig_par <- setAlPar(min.spectra.cor = 0.9,
-                     max.time.dist = 3,
+                     max.time.dist = 5,
                      mz.range = 50:500)
 # Alignment
 peak_alig <- alignComp(dec_data,
                        alParameters = alig_par)
 
 ```
+
+## Missing Compound Recovery
 
 By means of the "recMissComp" function it is used to recover missing compounds in spectral data, which allows the general model to be adjusted to the compounds present in a minimum number of samples and can consider the spectra of samples where the compound is missing to obtain the final average spectrum.
 
@@ -123,7 +127,7 @@ peak_find <- recMissComp(peak_alig,
 
 ```
 
-Identification
+# Identification
 
 ```{r echo=TRUE, warning=FALSE}
 
@@ -141,7 +145,7 @@ mslib <- nist.database
 peak_iden <- identifyComp(peak_find,
                           id.database = mslib,
                           mz.range = NULL,
-                          n.putative = 20)
+                          n.putative = 100)
 # Identified compounds list
 id_list <- idList(peak_iden)
 # Exporting identified compounds list
@@ -150,7 +154,17 @@ id_list <- idList(peak_iden)
 
 ```
 
-### Cleaning the identification list
+Exporting spectra to NIST identification.
+
+```{r echo=TRUE}
+
+export2MSP(peak_iden,
+           store.path = "Result/eRah_Result",
+           alg.version = 2)
+
+```
+
+## Cleaning the identification list
 
 How many metabolites were identified?
 How we are clean the identified compound list?
@@ -195,36 +209,141 @@ plotProfile(peak_iden, 1)
 
 ```
 
-# Tiglic acid
-
-Peak of AlignID number 44
+Peak of AlignID number 2
 
 ```{r echo=TRUE}
 
-plotProfile(peak_iden, 44)
+plotProfile(peak_iden, 2)
+# Visual inspection:
+# Low quality peak
+
+```
+
+Peak of AlignID number 3
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 3)
+# Visual inspection:
+# Low quality peak
+
+```
+
+Peak of AlignID number 4
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 4)
+# Visual inspection:
+# Low quality peak
+
+```
+
+Peak of AlignID number 5
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 5)
+# Visual inspection:
+# Low quality peak
+
+```
+
+### 2-Butenoic acid, 3-methyl-
+
+Peak of AlignID number 7
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 7)
 # Visual inspection:
 # Good peak shape
 
 ```
 
-Mirror plot of  alignID number 44
+Mirror plot of  alignID number 7
 
 ```{r echo=TRUE}
 
-plotSpectra(peak_iden, 44, 4, draw.color = "red", xlim = c(50,110))
+plotSpectra(peak_iden, 7,
+            draw.color = "red",
+            comp.db = 294996,
+            xlim = c(50,140))
 # Experimental RI = 959 (Calculated by GCMSsolution software)
-# Literature RI = 941 (NIST#: 150619)
-# ΔRI = 18
+# Literature RI = 953 (NIST#: 230321)
+# ΔRI = 6
 
 ```
 
-Exporting spectra to NIST identification
+Peak of AlignID number 8
 
 ```{r echo=TRUE}
 
-export2MSP(peak_iden,
-           store.path = "Result/eRah_Result",
-           alg.version = 2)
+plotProfile(peak_iden, 8)
+# Visual inspection:
+# Good peak shape
 
 ```
+
+Mirror plot of  alignID number 8
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 8, 1,
+            draw.color = "red",
+            xlim = c(50,150))
+# Experimental RI = 968 (Calculated by GCMSsolution software)
+# Literature RI = 759 (NIST#: 292995)
+# ΔRI = 209 (High RI)
+
+```
+
+Peak of AlignID number 9
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 9)
+# Visual inspection:
+# Good peak shape
+
+```
+
+Mirror plot of  alignID number 9
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 9,
+            draw.color = "red",
+            comp.db = 294996,
+            xlim = c(50,140))
+# Experimental RI = 959 (Calculated by GCMSsolution software)
+# Literature RI = 953 (NIST#: 230321)
+# ΔRI = 6
+
+```
+
+Peak of AlignID number 10
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 10)
+# Visual inspection:
+# Good peak shape
+
+```
+
+Mirror plot of  alignID number 10
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 10, 7,
+            draw.color = "red",
+            xlim = c(50,150))
+# Experimental RI = 968 (Calculated by GCMSsolution software)
+# Literature RI = 934 (NIST#: 162182)
+# ΔRI = 34
+
+```
+
+
 
