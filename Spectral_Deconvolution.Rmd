@@ -322,6 +322,8 @@ plotSpectra(peak_iden, 9,
 
 ```
 
+### 2(5H)-Furanone, 3-methyl-
+
 Peak of AlignID number 10
 
 ```{r echo=TRUE}
@@ -336,12 +338,42 @@ Mirror plot of  alignID number 10
 
 ```{r echo=TRUE}
 
-plotSpectra(peak_iden, 10, 7,
+plotSpectra(peak_iden, 10, 36,
             draw.color = "red",
             xlim = c(50,150))
 # Experimental RI = 968 (Calculated by GCMSsolution software)
-# Literature RI = 934 (NIST#: 162182)
-# ΔRI = 34
+# Literature RI = 983 (NIST#: 156505)
+# ΔRI = 15
+
+```
+
+Peak of AlignID number 11
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 11)
+# Visual inspection:
+# Low quality peak
+
+```
+
+Peak of AlignID number 12
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 12)
+# Visual inspection:
+# Low quality peak
+
+```
+
+Peak of AlignID number 13
+
+```{r echo=TRUE}
+
+plotProfile(peak_iden, 13)
+# Visual inspection:
+# Good peak shape
 
 ```
 
