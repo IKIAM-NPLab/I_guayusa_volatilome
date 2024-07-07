@@ -59,7 +59,7 @@ Next...
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 data <- read_from_excel(file = "Data/Data_to_notame/MZmine_Feature_List_2notame.xlsx", sheet = 1, 
-                        corner_row = 6, corner_column = "G", 
+                        corner_row = 6, corner_column = "J", 
                         split_by = c("Column", "Ion mode"))
 
 ```
@@ -115,8 +115,10 @@ The next step...
 
 # Drift correction
 corrected <- correct_drift(mode)
+corrected <- correct_drift(corrected)
 # Flag low quality features
-corrected <- flag_quality(corrected, condition = "RSD_r < 0.3 & D_ratio_r < 0.6")
+corrected <- flag_quality(corrected,
+                          condition = "RSD_r < 0.3 & D_ratio_r < 0.6")
 
 ```
 
@@ -152,10 +154,14 @@ Contaminant...
 corrected_no_blank <- flag_contaminants(corrected,
                                         blank_col = "Group",
                                         blank_label = "Blank",
-                                        flag_thresh = 0.5,
+                                        flag_thresh = 0.38,
                                         flag_label = "Contaminant")
 # Removal blank group from dataset
 corrected_no_blank <- corrected_no_blank[, corrected_no_blank$Group != "Blank"]
+
+# Exporting data to clean identified features
+write_to_excel(corrected_no_blank,
+               "Result/notame_Result/corrected_no_blank.xlsx")
 
 ```
 
@@ -182,7 +188,7 @@ The next step...
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 clustered <- cluster_features(corrected_no_blank,
-                              rt_window = 1/90,
+                              rt_window = 1/100,
                               corr_thresh = 0.95,
                               d_thresh = 0.8,
                               #plotting = TRUE,
@@ -317,7 +323,7 @@ Preparing data and transposing feature table.
 # Transposing feature height table
 transp_table  <- t(glog_set)
 # Centering and Scaling features
-ei_pca <- prcomp(transp_table, center = TRUE, scale. = FALSE)
+ei_pca <- prcomp(transp_table, center = TRUE, scale. = TRUE)
 
 ```
 
@@ -334,10 +340,10 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
   left_join(pheno_data )                 # Adding metadata
 # PCA plot
 ggplot(scores,
-       aes(PC1, PC2, shape = Factor, color = Factor)) +
+       aes(PC1, PC2, shape = Light_condition, color = Light_condition)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (17.4 %)"),
-         y=guide_axis(title = "PC2 (14.87 %)")) +
+  guides(x=guide_axis(title = "PC1 (15.41 %)"),
+         y=guide_axis(title = "PC2 (12.60 %)")) +
   theme_classic() +
   theme(legend.text = element_text(face="italic")) +
   theme(legend.position = c(0.1, 0.18),
