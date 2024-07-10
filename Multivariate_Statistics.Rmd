@@ -58,8 +58,8 @@ Next...
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-data <- read_from_excel(file = "Data/Data_to_notame/MZmine_Feature_List_2notame.xlsx", sheet = 1, 
-                        corner_row = 6, corner_column = "J", 
+data <- read_from_excel(file = "Data/Data_to_notame/MZmine_Feature_List_2notame.xlsx", sheet = 2, 
+                        corner_row = 11, corner_column = "J", 
                         split_by = c("Column", "Ion mode"))
 
 ```
@@ -115,7 +115,6 @@ The next step...
 
 # Drift correction
 corrected <- correct_drift(mode)
-corrected <- correct_drift(corrected)
 # Flag low quality features
 corrected <- flag_quality(corrected,
                           condition = "RSD_r < 0.3 & D_ratio_r < 0.6")
@@ -128,8 +127,8 @@ Then we can visualize the data after drift correction.
 
 # Boxplot
 corr_bp <- plot_sample_boxplots(corrected,
-                                order_by = "Group",
-                                fill_by = "Light_condition")
+                                order_by = "QC",
+                                fill_by = "QC")
 # PCA
 corr_pca <- plot_pca(corrected,
                      center = TRUE,
@@ -171,8 +170,8 @@ Dta visualization...
 
 # Boxplot
 no_blank_bp <- plot_sample_boxplots(corrected_no_blank,
-                                 order_by = "Group",
-                                 fill_by = "Light_condition")
+                                 order_by = "QC",
+                                 fill_by = "QC")
 # PCA
 no_blank_pca <- plot_pca(corrected_no_blank,
                       center = TRUE,
@@ -204,8 +203,8 @@ We can visualize data...
 
 # Boxplot
 clust_bp <- plot_sample_boxplots(compressed,
-                                 order_by = "Group",
-                                 fill_by = "Factor")
+                                 order_by = "QC",
+                                 fill_by = "QC")
 # PCA
 clust_pca <- plot_pca(compressed,
                       center = TRUE,
@@ -245,8 +244,8 @@ We can inspect PCA plot after...
 
 # Boxplot
 imp_bp <- plot_sample_boxplots(imputed,
-                               order_by = "Group",
-                               fill_by = "Factor")
+                               order_by = "QC",
+                               fill_by = "QC")
 # PCA
 imp_pca <- plot_pca(imputed,
                     center = TRUE,
@@ -275,8 +274,8 @@ We can inspect PCA plot after...
 
 # Boxplot
 pqn_bp <- plot_sample_boxplots(pqn_set,
-                               order_by = "Group",
-                               fill_by = "Factor")
+                               order_by = "Injection_order",
+                               fill_by = "QC")
 # PCA
 pqn_pca <- plot_pca(pqn_set,
                     center = TRUE,
@@ -286,6 +285,8 @@ pqn_pca <- plot_pca(pqn_set,
 pqn_pca + pqn_bp
 
 ```
+
+### PCA to see subQC clusters
 
 Droping flagged features...
 
@@ -304,14 +305,22 @@ The next step is...
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-# Package to generalised logarithmic transform
+# "SummarizedExperiment" package installation
+#if (!require("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+#BiocManager::install("SummarizedExperiment")
+library(SummarizedExperiment)
+# Convert feature height table to SummarizedExperiment class
+pmp_data <- SummarizedExperiment(assays = peak_height,
+                                 colData = pheno_data)
+# Package to generalized logarithmic transform
 #if (!requireNamespace("BiocManager", quietly = TRUE))
 #    install.packages("BiocManager")
 #BiocManager::install("pmp")
 library(pmp)
 # Generalised logarithmic transform
-glog_set <- glog_transformation (df = peak_height,
-                                 classes = pheno_data$Group,
+glog_set <- glog_transformation (df = pmp_data@assays@data@listData[[1]],
+                                 classes = pmp_data$QC,
                                  qc_label = "QC")
 
 ```
@@ -329,6 +338,8 @@ ei_pca <- prcomp(transp_table, center = TRUE, scale. = TRUE)
 
 Plotting PCA results.
 
+Light level PCA plot
+
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # Library to left_join use
@@ -340,12 +351,68 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
   left_join(pheno_data )                 # Adding metadata
 # PCA plot
 ggplot(scores,
-       aes(PC1, PC2, shape = Light_condition, color = Light_condition)) +
+       aes(PC1, PC2, shape = Light_in_subQC, color = Light_in_subQC)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (15.41 %)"),
-         y=guide_axis(title = "PC2 (12.60 %)")) +
+  guides(x=guide_axis(title = "PC1 (22.98 %)"),
+         y=guide_axis(title = "PC2 (12.28 %)")) +
+  labs(shape = 'Light condition', color= 'Light condition') +
   theme_classic() +
-  theme(legend.text = element_text(face="italic")) +
+  theme(legend.position = c(0.1, 0.18),
+        legend.background = element_rect(fill = "white", color = "black")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+# Save plot
+#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+Period age level PCA plot
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# PCA scores
+scores <- ei_pca$x %>%                   # Get PC coordinates
+  data.frame %>%                         # Convert to data frames
+  mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
+  left_join(pheno_data )                 # Adding metadata
+# PCA plot
+ggplot(scores,
+       aes(PC1, PC2, shape = Age_in_subQC, color = Age_in_subQC)) +
+  geom_point(size = 3) +
+  guides(x=guide_axis(title = "PC1 (22.98 %)"),
+         y=guide_axis(title = "PC2 (12.28 %)")) +
+  labs(shape = 'Period age', color= 'Period age') +
+  theme_classic() +
+  theme(legend.position = c(0.1, 0.18),
+        legend.background = element_rect(fill = "white", color = "black")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+# Save plot
+#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+Location level PCA plot
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# PCA scores
+scores <- ei_pca$x %>%                   # Get PC coordinates
+  data.frame %>%                         # Convert to data frames
+  mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
+  left_join(pheno_data )                 # Adding metadata
+# PCA plot
+ggplot(scores,
+       aes(PC1, PC2, shape = Location_in_subQC, color = Location_in_subQC)) +
+  geom_point(size = 3) +
+  guides(x=guide_axis(title = "PC1 (22.98 %)"),
+         y=guide_axis(title = "PC2 (12.28 %)")) +
+  labs(shape = 'Location', color= 'Location') +
+  theme_classic() +
   theme(legend.position = c(0.1, 0.18),
         legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
@@ -379,6 +446,535 @@ ggplot(loadings, aes(PC1, PC2)) +
   geom_point(alpha = 0.2) +
   theme_classic() + 
   geom_point(data = loadings, size = 1) +
+  #ggrepel::geom_label_repel(data = ei_compouds,
+                            #aes(label = Metabolite_name),
+                            #box.padding = 0.8,
+                            #label.padding = 0.3,
+                            #label.r = 0.3,
+                            #cex = 3.7) +
+  guides(x=guide_axis(title = "PC1 (23.65 %)"),
+         y=guide_axis(title = "PC2 (20.46 %)")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray") +
+  ggsci::scale_color_aaas()
+# Save plot
+#ggsave('Result/GCMS/GCMS_Loadings_to_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+
+
+
+
+
+
+
+
+
+### PCA to see all sample clusters
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Drop Sub QC
+no_subqc <- pqn_set[, pqn_set$Age_in_samples != "Sub_Quality_Control"]
+# Extract clean data
+no_flag1 <- drop_flagged(no_subqc)
+# Extracting feature height table
+peak_height1 <- exprs(no_flag1)
+# Extracting Phenotipic data
+pheno_data1 <- no_flag1@phenoData@data
+
+```
+
+The next step is...
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Convert feature height table to SummarizedExperiment class
+pmp_data1 <- SummarizedExperiment(assays = peak_height1,
+                                  colData = pheno_data1)
+# Generalized logarithmic transform
+glog_set1 <- glog_transformation (df = pmp_data1@assays@data@listData[[1]],
+                                  classes = pmp_data1$QC,
+                                  qc_label = "QC")
+
+```
+
+Preparing data and transposing feature table.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Transposing feature height table
+transp_table1  <- t(glog_set1)
+# Centering and Scaling features
+ei_pca1 <- prcomp(transp_table1, center = TRUE, scale. = FALSE)
+
+```
+
+Plotting PCA results.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# PCA scores
+scores <- ei_pca1$x %>%                   # Get PC coordinates
+  data.frame %>%                         # Convert to data frames
+  mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
+  left_join(pheno_data1)                 # Adding metadata
+# PCA plot
+ggplot(scores,
+       aes(PC1, PC2, shape = Light_in_samples, color = Light_in_samples)) +
+  geom_point(size = 3) +
+  guides(x=guide_axis(title = "PC1 (24.68 %)"),
+         y=guide_axis(title = "PC2 (12.29 %)")) +
+  labs(shape = 'Light condition', color= 'Light condition') +
+  theme_classic() +
+  theme(legend.position = c(0.1, 0.18),
+        legend.background = element_rect(fill = "white", color = "black")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+# Save plot
+#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+Age level PCA score plot
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# PCA scores
+scores <- ei_pca1$x %>%                   # Get PC coordinates
+  data.frame %>%                         # Convert to data frames
+  mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
+  left_join(pheno_data1)                 # Adding metadata
+# PCA plot
+ggplot(scores,
+       aes(PC1, PC2, shape = Age_in_samples, color = Age_in_samples)) +
+  geom_point(size = 3) +
+  guides(x=guide_axis(title = "PC1 (24.68 %)"),
+         y=guide_axis(title = "PC2 (12.29 %)")) +
+  labs(shape = 'Period age', color= 'Period age') +
+  theme_classic() +
+  theme(legend.position = c(0.1, 0.18),
+        legend.background = element_rect(fill = "white", color = "black")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+# Save plot
+#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+Location level PCA score plot
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# PCA scores
+scores <- ei_pca1$x %>%                   # Get PC coordinates
+  data.frame %>%                         # Convert to data frames
+  mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
+  left_join(pheno_data1)                 # Adding metadata
+# PCA plot
+ggplot(scores,
+       aes(PC1, PC2, shape = Location_in_samples, color = Location_in_samples)) +
+  geom_point(size = 3) +
+  guides(x=guide_axis(title = "PC1 (24.68 %)"),
+         y=guide_axis(title = "PC2 (12.29 %)")) +
+  labs(shape = 'Location', color='Location') +
+  theme_classic() +
+  theme(legend.position = c(0.1, 0.18),
+        legend.background = element_rect(fill = "white", color = "black")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+# Save plot
+#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+Plotting loading results.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+loadings1 <- ei_pca1$rotation %>%          # Extract loadings
+  data.frame(Feature_ID = rownames(.))    # New column with feat name
+
+```
+
+Creating an artificial table with Feature name and Compound column.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Load a metabolite name table
+#metab_name <- readxl::read_excel("Data/GCMS_Metabolites.xlsx", 6)
+# Creating a new small table of the annotated compounds
+#ei_compouds <- left_join(metab_name, loadings)
+# Plotting results
+ggplot(loadings1, aes(PC1, PC2)) + 
+  geom_point(alpha = 0.2) +
+  theme_classic() + 
+  geom_point(data = loadings1, size = 1) +
+  #ggrepel::geom_label_repel(data = ei_compouds,
+                            #aes(label = Metabolite_name),
+                            #box.padding = 0.8,
+                            #label.padding = 0.3,
+                            #label.r = 0.3,
+                            #cex = 3.7) +
+  guides(x=guide_axis(title = "PC1 (23.65 %)"),
+         y=guide_axis(title = "PC2 (20.46 %)")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray") +
+  ggsci::scale_color_aaas()
+# Save plot
+#ggsave('Result/GCMS/GCMS_Loadings_to_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+### PCA of each location
+
+Alto Pano
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Extracting "Alto Pano" (B) data
+b_data <- no_subqc[, no_subqc$Location_in_samples != "Alto Tena"]
+b_data <- b_data[, b_data$Location_in_samples != "Talag"]
+# Extracting clean data
+b_data  <- drop_flagged(b_data)
+# Extracting feature height table
+peak_height2 <- exprs(b_data )
+# Extracting Phenotipic data
+pheno_data2 <- b_data @phenoData@data
+
+```
+
+The next step is...
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Convert feature height table to SummarizedExperiment class
+pmp_data2 <- SummarizedExperiment(assays = peak_height2,
+                                  colData = pheno_data2)
+# Generalized logarithmic transform
+glog_set2 <- glog_transformation (df = pmp_data2@assays@data@listData[[1]],
+                                  classes = pmp_data2$QC,
+                                  qc_label = "QC")
+
+
+
+```
+
+Preparing data and transposing feature table.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Transposing feature height table
+transp_table2  <- t(glog_set2)
+# Centering and Scaling features
+ei_pca2 <- prcomp(transp_table2, center = TRUE, scale. = FALSE)
+
+```
+
+Plotting PCA results.
+
+Light level PCA plot
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# PCA scores
+scores <- ei_pca2$x %>%                  # Get PC coordinates
+  data.frame %>%                         # Convert to data frames
+  mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
+  left_join(pheno_data2)                 # Adding metadata
+# PCA plot
+ggplot(scores,
+       aes(PC1, PC2, shape = Age_in_samples, color = Light_in_samples)) +
+  geom_point(size = 3) +
+  guides(x=guide_axis(title = "PC1 (34.58 %)"),
+         y=guide_axis(title = "PC2 (17.99 %)")) +
+  labs(shape = 'Period age', color='Light condition') +
+  theme_classic() +
+  theme(legend.position = c(0.1, 0.18),
+        legend.background = element_rect(fill = "white", color = "black")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+# Save plot
+#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+Plotting loading results.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+loadings2 <- ei_pca2$rotation %>%         # Extract loadings
+  data.frame(Feature_ID = rownames(.))    # New column with feat name
+
+```
+
+Creating an artificial table with Feature name and Compound column.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Load a metabolite name table
+#metab_name <- readxl::read_excel("Data/GCMS_Metabolites.xlsx", 6)
+# Creating a new small table of the annotated compounds
+#ei_compouds <- left_join(metab_name, loadings)
+# Plotting results
+ggplot(loadings2, aes(PC1, PC2)) + 
+  geom_point(alpha = 0.2) +
+  theme_classic() + 
+  geom_point(data = loadings2, size = 1) +
+  #ggrepel::geom_label_repel(data = ei_compouds,
+                            #aes(label = Metabolite_name),
+                            #box.padding = 0.8,
+                            #label.padding = 0.3,
+                            #label.r = 0.3,
+                            #cex = 3.7) +
+  guides(x=guide_axis(title = "PC1 (23.65 %)"),
+         y=guide_axis(title = "PC2 (20.46 %)")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray") +
+  ggsci::scale_color_aaas()
+# Save plot
+#ggsave('Result/GCMS/GCMS_Loadings_to_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+
+
+
+
+
+
+Alto Tena
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Extracting "Alto Pano" (B) data
+c_data <- no_subqc[, no_subqc$Location_in_samples != "Alto Pano"]
+c_data <- c_data[, c_data$Location_in_samples != "Talag"]
+# Extracting clean data
+c_data  <- drop_flagged(c_data)
+# Extracting feature height table
+peak_height3 <- exprs(c_data )
+# Extracting Phenotipic data
+pheno_data3 <- c_data @phenoData@data
+
+```
+
+The next step is...
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Convert feature height table to SummarizedExperiment class
+pmp_data3 <- SummarizedExperiment(assays = peak_height3,
+                                  colData = pheno_data3)
+# Generalized logarithmic transform
+glog_set3 <- glog_transformation(df = pmp_data3@assays@data@listData[[1]],
+                                 classes = pmp_data3$QC,
+                                 qc_label = "QC")
+
+```
+
+Preparing data and transposing feature table.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Transposing feature height table
+transp_table3  <- t(glog_set3)
+# Centering and Scaling features
+ei_pca3 <- prcomp(transp_table3, center = TRUE, scale. = FALSE)
+
+```
+
+Plotting PCA results.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# PCA scores
+scores <- ei_pca3$x %>%                  # Get PC coordinates
+  data.frame %>%                         # Convert to data frames
+  mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
+  left_join(pheno_data3)                 # Adding metadata
+# PCA plot
+ggplot(scores,
+       aes(PC1, PC2, shape = Age_in_samples, color = Light_in_samples)) +
+  geom_point(size = 3) +
+  guides(x=guide_axis(title = "PC1 (24.78 %)"),
+         y=guide_axis(title = "PC2 (17.74 %)")) +
+  labs(shape = 'Period age', color='Light condition') +
+  labs(shape = 'Group', color='Group') +
+  theme_classic() +
+  theme(legend.position = c(0.1, 0.18),
+        legend.background = element_rect(fill = "white", color = "black")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+# Save plot
+#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+Plotting loading results.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+loadings3 <- ei_pca3$rotation %>%         # Extract loadings
+  data.frame(Feature_ID = rownames(.))    # New column with feat name
+
+```
+
+Creating an artificial table with Feature name and Compound column.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Load a metabolite name table
+#metab_name <- readxl::read_excel("Data/GCMS_Metabolites.xlsx", 6)
+# Creating a new small table of the annotated compounds
+#ei_compouds <- left_join(metab_name, loadings)
+# Plotting results
+ggplot(loadings3, aes(PC1, PC2)) + 
+  geom_point(alpha = 0.2) +
+  theme_classic() + 
+  geom_point(data = loadings3, size = 1) +
+  #ggrepel::geom_label_repel(data = ei_compouds,
+                            #aes(label = Metabolite_name),
+                            #box.padding = 0.8,
+                            #label.padding = 0.3,
+                            #label.r = 0.3,
+                            #cex = 3.7) +
+  guides(x=guide_axis(title = "PC1 (23.65 %)"),
+         y=guide_axis(title = "PC2 (20.46 %)")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray") +
+  ggsci::scale_color_aaas()
+# Save plot
+#ggsave('Result/GCMS/GCMS_Loadings_to_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+
+
+
+
+Talag
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Extracting "Alto Pano" (B) data
+a_data <- no_subqc[, no_subqc$Location_in_samples != "Alto Pano"]
+a_data <- a_data[, a_data$Location_in_samples != "Alto Tena"]
+# Extracting clean data
+a_data  <- drop_flagged(a_data)
+# Extracting feature height table
+peak_height4 <- exprs(a_data )
+# Extracting Phenotipic data
+pheno_data4 <- a_data@phenoData@data
+
+```
+
+The next step is...
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Convert feature height table to SummarizedExperiment class
+pmp_data4 <- SummarizedExperiment(assays = peak_height4,
+                                  colData = pheno_data4)
+# Generalized logarithmic transform
+glog_set4 <- glog_transformation(df = pmp_data4@assays@data@listData[[1]],
+                                 classes = pmp_data4$QC,
+                                 qc_label = "QC")
+
+```
+
+Preparing data and transposing feature table.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Transposing feature height table
+transp_table4  <- t(glog_set4)
+# Centering and Scaling features
+ei_pca4 <- prcomp(transp_table4, center = TRUE, scale. = FALSE)
+
+```
+
+Plotting PCA results.
+
+Light level PCA plot
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# PCA scores
+scores <- ei_pca4$x %>%                  # Get PC coordinates
+  data.frame %>%                         # Convert to data frames
+  mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
+  left_join(pheno_data4)                 # Adding metadata
+# PCA plot
+ggplot(scores,
+       aes(PC1, PC2, shape = Age_in_samples, color = Light_in_samples)) +
+  geom_point(size = 3) +
+  guides(x=guide_axis(title = "PC1 (33.09 %)"),
+         y=guide_axis(title = "PC2 (18.69 %)")) +
+  labs(shape = 'Period age', color='Light condition') +
+  theme_classic() +
+  theme(legend.position = c(0.1, 0.18),
+        legend.background = element_rect(fill = "white", color = "black")) +
+  theme(panel.grid = element_blank(), 
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+# Save plot
+#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+Plotting loading results.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+loadings4 <- ei_pca4$rotation %>%           # Extract loadings
+  data.frame(Feature_ID = rownames(.))    # New column with feat name
+
+```
+
+Creating an artificial table with Feature name and Compound column.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Load a metabolite name table
+#metab_name <- readxl::read_excel("Data/GCMS_Metabolites.xlsx", 6)
+# Creating a new small table of the annotated compounds
+#ei_compouds <- left_join(metab_name, loadings)
+# Plotting results
+ggplot(loadings4, aes(PC1, PC2)) + 
+  geom_point(alpha = 0.2) +
+  theme_classic() + 
+  geom_point(data = loadings4, size = 1) +
   #ggrepel::geom_label_repel(data = ei_compouds,
                             #aes(label = Metabolite_name),
                             #box.padding = 0.8,
