@@ -58,8 +58,8 @@ Next...
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-data <- read_from_excel(file = "Data/Data_to_notame/MZmine_Feature_List_2notame.xlsx", sheet = 2, 
-                        corner_row = 11, corner_column = "J", 
+data <- read_from_excel(file = "Data/Data_to_notame/erah_Feature_List_2Notame.xlsx", sheet = 2, 
+                        corner_row = 11, corner_column = "G", 
                         split_by = c("Column", "Ion mode"))
 
 ```
@@ -132,8 +132,8 @@ corr_bp <- plot_sample_boxplots(corrected,
 # PCA
 corr_pca <- plot_pca(corrected,
                      center = TRUE,
-                     shape = "Light_condition",
-                     color = "Light_condition")
+                     shape = "QC",
+                     color = "QC")
 # Package to plots visualization in a same windows
 #if (!requireNamespace("devtools", quietly = TRUE)) {
 #  install.packages("devtools")
@@ -160,7 +160,7 @@ corrected_no_blank <- corrected_no_blank[, corrected_no_blank$Group != "Blank"]
 
 # Exporting data to clean identified features
 write_to_excel(corrected_no_blank,
-               "Result/notame_Result/corrected_no_blank.xlsx")
+               "Result/notame_Result/erah_corrected_no_blank.xlsx")
 
 ```
 
@@ -353,8 +353,8 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
 ggplot(scores,
        aes(PC1, PC2, shape = Light_in_subQC, color = Light_in_subQC)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (22.98 %)"),
-         y=guide_axis(title = "PC2 (12.28 %)")) +
+  guides(x=guide_axis(title = "PC1 (15.49 %)"),
+         y=guide_axis(title = "PC2 (13.03 %)")) +
   labs(shape = 'Light condition', color= 'Light condition') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -381,8 +381,8 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
 ggplot(scores,
        aes(PC1, PC2, shape = Age_in_subQC, color = Age_in_subQC)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (22.98 %)"),
-         y=guide_axis(title = "PC2 (12.28 %)")) +
+  guides(x=guide_axis(title = "PC1 (15.49 %)"),
+         y=guide_axis(title = "PC2 (13.03 %)")) +
   labs(shape = 'Period age', color= 'Period age') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -409,8 +409,8 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
 ggplot(scores,
        aes(PC1, PC2, shape = Location_in_subQC, color = Location_in_subQC)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (22.98 %)"),
-         y=guide_axis(title = "PC2 (12.28 %)")) +
+  guides(x=guide_axis(title = "PC1 (15.49 %)"),
+         y=guide_axis(title = "PC2 (13.03 %)")) +
   labs(shape = 'Location', color= 'Location') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -452,8 +452,8 @@ ggplot(loadings, aes(PC1, PC2)) +
                             #label.padding = 0.3,
                             #label.r = 0.3,
                             #cex = 3.7) +
-  guides(x=guide_axis(title = "PC1 (23.65 %)"),
-         y=guide_axis(title = "PC2 (20.46 %)")) +
+  guides(x=guide_axis(title = "PC1 (15.49 %)"),
+         y=guide_axis(title = "PC2 (13.03 %)")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
@@ -509,7 +509,7 @@ Preparing data and transposing feature table.
 # Transposing feature height table
 transp_table1  <- t(glog_set1)
 # Centering and Scaling features
-ei_pca1 <- prcomp(transp_table1, center = TRUE, scale. = FALSE)
+ei_pca1 <- prcomp(transp_table1, center = TRUE, scale. = TRUE)
 
 ```
 
@@ -518,16 +518,16 @@ Plotting PCA results.
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores <- ei_pca1$x %>%                   # Get PC coordinates
+scores1 <- ei_pca1$x %>%                 # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data1)                 # Adding metadata
 # PCA plot
-ggplot(scores,
+ggplot(scores1,
        aes(PC1, PC2, shape = Light_in_samples, color = Light_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (24.68 %)"),
-         y=guide_axis(title = "PC2 (12.29 %)")) +
+  guides(x=guide_axis(title = "PC1 (17.48 %)"),
+         y=guide_axis(title = "PC2 (13.68 %)")) +
   labs(shape = 'Light condition', color= 'Light condition') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -546,16 +546,16 @@ Age level PCA score plot
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores <- ei_pca1$x %>%                   # Get PC coordinates
+scores1 <- ei_pca1$x %>%                 # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data1)                 # Adding metadata
 # PCA plot
-ggplot(scores,
+ggplot(scores1,
        aes(PC1, PC2, shape = Age_in_samples, color = Age_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (24.68 %)"),
-         y=guide_axis(title = "PC2 (12.29 %)")) +
+  guides(x=guide_axis(title = "PC1 (17.48 %)"),
+         y=guide_axis(title = "PC2 (13.68 %)")) +
   labs(shape = 'Period age', color= 'Period age') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -574,16 +574,16 @@ Location level PCA score plot
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores <- ei_pca1$x %>%                   # Get PC coordinates
+scores1 <- ei_pca1$x %>%                 # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data1)                 # Adding metadata
 # PCA plot
-ggplot(scores,
+ggplot(scores1,
        aes(PC1, PC2, shape = Location_in_samples, color = Location_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (24.68 %)"),
-         y=guide_axis(title = "PC2 (12.29 %)")) +
+  guides(x=guide_axis(title = "PC1 (17.48 %)"),
+         y=guide_axis(title = "PC2 (13.68 %)")) +
   labs(shape = 'Location', color='Location') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -625,8 +625,8 @@ ggplot(loadings1, aes(PC1, PC2)) +
                             #label.padding = 0.3,
                             #label.r = 0.3,
                             #cex = 3.7) +
-  guides(x=guide_axis(title = "PC1 (23.65 %)"),
-         y=guide_axis(title = "PC2 (20.46 %)")) +
+  guides(x=guide_axis(title = "PC1 (17.48 %)"),
+         y=guide_axis(title = "PC2 (13.68 %)")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
@@ -688,7 +688,7 @@ Preparing data and transposing feature table.
 # Transposing feature height table
 transp_table2  <- t(glog_set2)
 # Centering and Scaling features
-ei_pca2 <- prcomp(transp_table2, center = TRUE, scale. = FALSE)
+ei_pca2 <- prcomp(transp_table2, center = TRUE, scale. = TRUE)
 
 ```
 
@@ -699,16 +699,16 @@ Light level PCA plot
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores <- ei_pca2$x %>%                  # Get PC coordinates
+scores2 <- ei_pca2$x %>%                 # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data2)                 # Adding metadata
 # PCA plot
-ggplot(scores,
+ggplot(scores2,
        aes(PC1, PC2, shape = Age_in_samples, color = Light_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (34.58 %)"),
-         y=guide_axis(title = "PC2 (17.99 %)")) +
+  guides(x=guide_axis(title = "PC1 (26.15 %)"),
+         y=guide_axis(title = "PC2 (18.34 %)")) +
   labs(shape = 'Period age', color='Light condition') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -750,8 +750,8 @@ ggplot(loadings2, aes(PC1, PC2)) +
                             #label.padding = 0.3,
                             #label.r = 0.3,
                             #cex = 3.7) +
-  guides(x=guide_axis(title = "PC1 (23.65 %)"),
-         y=guide_axis(title = "PC2 (20.46 %)")) +
+  guides(x=guide_axis(title = "PC1 (26.15 %)"),
+         y=guide_axis(title = "PC2 (18.34 %)")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
@@ -805,7 +805,7 @@ Preparing data and transposing feature table.
 # Transposing feature height table
 transp_table3  <- t(glog_set3)
 # Centering and Scaling features
-ei_pca3 <- prcomp(transp_table3, center = TRUE, scale. = FALSE)
+ei_pca3 <- prcomp(transp_table3, center = TRUE, scale. = TRUE)
 
 ```
 
@@ -814,16 +814,16 @@ Plotting PCA results.
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores <- ei_pca3$x %>%                  # Get PC coordinates
+scores3 <- ei_pca3$x %>%                  # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data3)                 # Adding metadata
 # PCA plot
-ggplot(scores,
+ggplot(scores3,
        aes(PC1, PC2, shape = Age_in_samples, color = Light_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (24.78 %)"),
-         y=guide_axis(title = "PC2 (17.74 %)")) +
+  guides(x=guide_axis(title = "PC1 (22.04 %)"),
+         y=guide_axis(title = "PC2 (13.82 %)")) +
   labs(shape = 'Period age', color='Light condition') +
   labs(shape = 'Group', color='Group') +
   theme_classic() +
@@ -866,8 +866,8 @@ ggplot(loadings3, aes(PC1, PC2)) +
                             #label.padding = 0.3,
                             #label.r = 0.3,
                             #cex = 3.7) +
-  guides(x=guide_axis(title = "PC1 (23.65 %)"),
-         y=guide_axis(title = "PC2 (20.46 %)")) +
+  guides(x=guide_axis(title = "PC1 (22.04 %)"),
+         y=guide_axis(title = "PC2 (13.82 %)")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
@@ -919,7 +919,7 @@ Preparing data and transposing feature table.
 # Transposing feature height table
 transp_table4  <- t(glog_set4)
 # Centering and Scaling features
-ei_pca4 <- prcomp(transp_table4, center = TRUE, scale. = FALSE)
+ei_pca4 <- prcomp(transp_table4, center = TRUE, scale. = TRUE)
 
 ```
 
@@ -930,16 +930,16 @@ Light level PCA plot
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores <- ei_pca4$x %>%                  # Get PC coordinates
+scores4 <- ei_pca4$x %>%                  # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data4)                 # Adding metadata
 # PCA plot
-ggplot(scores,
+ggplot(scores4,
        aes(PC1, PC2, shape = Age_in_samples, color = Light_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (33.09 %)"),
-         y=guide_axis(title = "PC2 (18.69 %)")) +
+  guides(x=guide_axis(title = "PC1 (24.55 %)"),
+         y=guide_axis(title = "PC2 (16.61 %)")) +
   labs(shape = 'Period age', color='Light condition') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -981,8 +981,8 @@ ggplot(loadings4, aes(PC1, PC2)) +
                             #label.padding = 0.3,
                             #label.r = 0.3,
                             #cex = 3.7) +
-  guides(x=guide_axis(title = "PC1 (23.65 %)"),
-         y=guide_axis(title = "PC2 (20.46 %)")) +
+  guides(x=guide_axis(title = "PC1 (24.55 %)"),
+         y=guide_axis(title = "PC2 (16.61 %)")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +

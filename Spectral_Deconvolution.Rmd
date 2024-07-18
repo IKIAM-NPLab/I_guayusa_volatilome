@@ -72,10 +72,10 @@ Parameters for composite deconvolution are specified, defining specific criteria
 
 ```{r echo=TRUE}
 
-dec_par <- setDecPar(min.peak.width = 3,
+dec_par <- setDecPar(min.peak.width = 0.7,
                      min.peak.height = 500,
                      noise.threshold = 50,
-                     avoid.processing.mz = c(50:69,73:75,147:149),
+                     avoid.processing.mz = c(59:64,73:75,147:149),
                      analysis.time = c(3.1,50))
 
 ```
@@ -145,12 +145,12 @@ mslib <- nist.database
 peak_iden <- identifyComp(peak_find,
                           id.database = mslib,
                           mz.range = NULL,
-                          n.putative = 100)
+                          n.putative = 1)
 # Identified compounds list
 id_list <- idList(peak_iden)
 # Exporting identified compounds list
-#write.csv(id_list,
-#          file = "Result/eRah_Result/NIST_Identification.csv")
+write.csv(id_list,
+          file = "Result/eRah_Result/NIST_Identification.csv")
 
 ```
 
@@ -161,6 +161,19 @@ Exporting spectra to NIST identification.
 export2MSP(peak_iden,
            store.path = "Result/eRah_Result",
            alg.version = 2)
+
+```
+
+Exporting feature list to statistical analysis.
+
+```{r echo=TRUE}
+
+# Extracting alignment feature list
+feat_list <- alignList(peak_iden,
+                       by.area = FALSE)
+# Exporting alignment feature list
+write.csv(feat_list,
+          file = "Result/eRah_Result/erah_Export_2Notame.csv")
 
 ```
 
@@ -199,67 +212,7 @@ rti <- data.frame(rtime = c(7.557, 10.006, 12.569, 15.111, 17.581, 19.937,
 
 ```
 
-Peak of AlignID number 1
-
-```{r echo=TRUE}
-
-plotProfile(peak_iden, 1)
-# Visual inspection:
-# Low quality peak
-
-```
-
-Peak of AlignID number 2
-
-```{r echo=TRUE}
-
-plotProfile(peak_iden, 2)
-# Visual inspection:
-# Low quality peak
-
-```
-
-Peak of AlignID number 3
-
-```{r echo=TRUE}
-
-plotProfile(peak_iden, 3)
-# Visual inspection:
-# Low quality peak
-
-```
-
-Peak of AlignID number 4
-
-```{r echo=TRUE}
-
-plotProfile(peak_iden, 4)
-# Visual inspection:
-# Low quality peak
-
-```
-
-Peak of AlignID number 5
-
-```{r echo=TRUE}
-
-plotProfile(peak_iden, 5)
-# Visual inspection:
-# Low quality peak
-
-```
-
 ### 2-Butenoic acid, 3-methyl-
-
-Peak of AlignID number 7
-
-```{r echo=TRUE}
-
-plotProfile(peak_iden, 7)
-# Visual inspection:
-# Good peak shape
-
-```
 
 Mirror plot of  alignID number 7
 
@@ -267,115 +220,191 @@ Mirror plot of  alignID number 7
 
 plotSpectra(peak_iden, 7,
             draw.color = "red",
-            comp.db = 294996,
+            comp.db = 315647,
+            xlim = c(50,130))
+# Experimental RI = 958 (Calculated by GCMSsolution software)
+# Literature RI = 947 (NIST#: 1105)
+# ΔRI = 11
+
+```
+
+### Benzoic acid, ethyl ester
+
+Mirror plot of  alignID number 123
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 123,
+            draw.color = "red",
+            comp.db = 316698,
+            xlim = c(50,160))
+# Experimental Retention Index (RI)
+indexRtime(9.0501, rti)
+# Literature RI = 1172 (NIST#: 150033)
+# ΔRI = 11
+
+```
+
+### Benzoic acid
+
+Mirror plot of  alignID number 124
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 124,
+            draw.color = "red",
+            comp.db = 236,
+            xlim = c(50,160))
+# Experimental Retention Index (RI)
+indexRtime(9.049, rti)
+# Literature RI = 1171 (NIST#: 290514)
+# ΔRI = 10
+
+```
+
+### (E)-2,6-Dimethylocta-3,7-diene-2,6-diol
+
+Mirror plot of  alignID number 133
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 133,
+            draw.color = "red",
+            comp.db = 265239,
             xlim = c(50,140))
-# Experimental RI = 959 (Calculated by GCMSsolution software)
-# Literature RI = 953 (NIST#: 230321)
+# Experimental Retention Index (RI)
+indexRtime(9.7654, rti)
+# Literature RI = 1191 (NIST#: 412424)
+# ΔRI = 1
+
+```
+
+(E)-2,6-Dimethylocta-3,7-diene-2,6-diol
+
+Mirror plot of  alignID number 134
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 134,
+            draw.color = "red",
+            comp.db = 265239,
+            xlim = c(50,140))
+# Experimental Retention Index (RI)
+indexRtime(9.7659, rti)
+# Literature RI = 1191 (NIST#: 412424)
+# ΔRI = 1
+
+```
+
+### Catechol
+
+Mirror plot of  alignID number 140
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 140,
+            draw.color = "red",
+            comp.db = 8672,
+            xlim = c(50,130))
+# Experimental Retention Index (RI)
+indexRtime(9.9673, rti)
+# Literature RI = 1209 (NIST#: 227771)
+# ΔRI = 11
+
+```
+
+Catechol
+
+Mirror plot of  alignID number 141
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 141,
+            draw.color = "red",
+            comp.db = 8672,
+            xlim = c(50,130))
+# Experimental Retention Index (RI)
+indexRtime(9.9682, rti)
+# Literature RI = 1209 (NIST#: 227771)
+# ΔRI = 11
+
+```
+
+### Benzofuran, 2,3-dihydro-
+
+Mirror plot of  alignID number 152
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 152,
+            draw.color = "red",
+            comp.db = 27705,
+            xlim = c(50,160))
+# Experimental Retention Index (RI)
+indexRtime(10.4657, rti)
+# Literature RI = 1224 (NIST#: 477791)
 # ΔRI = 6
 
 ```
 
-Peak of AlignID number 8
+Benzofuran, 2,3-dihydro-
+
+Mirror plot of  alignID number 154
 
 ```{r echo=TRUE}
 
-plotProfile(peak_iden, 8)
-# Visual inspection:
-# Good peak shape
-
-```
-
-Mirror plot of  alignID number 8
-
-```{r echo=TRUE}
-
-plotSpectra(peak_iden, 8, 1,
+plotSpectra(peak_iden, 154,
             draw.color = "red",
-            xlim = c(50,150))
-# Experimental RI = 968 (Calculated by GCMSsolution software)
-# Literature RI = 759 (NIST#: 292995)
-# ΔRI = 209 (High RI)
-
-```
-
-Peak of AlignID number 9
-
-```{r echo=TRUE}
-
-plotProfile(peak_iden, 9)
-# Visual inspection:
-# Good peak shape
-
-```
-
-Mirror plot of  alignID number 9
-
-```{r echo=TRUE}
-
-plotSpectra(peak_iden, 9,
-            draw.color = "red",
-            comp.db = 294996,
-            xlim = c(50,140))
-# Experimental RI = 959 (Calculated by GCMSsolution software)
-# Literature RI = 953 (NIST#: 230321)
+            comp.db = 27705,
+            xlim = c(50,160))
+# Experimental Retention Index (RI)
+indexRtime(10.4718, rti)
+# Literature RI = 1224 (NIST#: 477791)
 # ΔRI = 6
 
 ```
 
-### 2(5H)-Furanone, 3-methyl-
+### Phenol, o-amino-
 
-Peak of AlignID number 10
-
-```{r echo=TRUE}
-
-plotProfile(peak_iden, 10)
-# Visual inspection:
-# Good peak shape
-
-```
-
-Mirror plot of  alignID number 10
+Mirror plot of  alignID number 156
 
 ```{r echo=TRUE}
 
-plotSpectra(peak_iden, 10, 36,
+plotSpectra(peak_iden, 156,
             draw.color = "red",
-            xlim = c(50,150))
-# Experimental RI = 968 (Calculated by GCMSsolution software)
-# Literature RI = 983 (NIST#: 156505)
-# ΔRI = 15
+            comp.db = 318455,
+            xlim = c(50,160))
+# Experimental Retention Index (RI)
+indexRtime(10.3802, rti)
+# Literature RI = 1215 (NIST#: 290667)
+# ΔRI = 0
 
 ```
 
-Peak of AlignID number 11
+### 1H-Pyrrole-2,5-dione, 3-ethyl-4-methyl-
+
+Mirror plot of  alignID number 178
 
 ```{r echo=TRUE}
 
-plotProfile(peak_iden, 11)
-# Visual inspection:
-# Low quality peak
+plotSpectra(peak_iden, 178,
+            draw.color = "red",
+            comp.db = 61858,
+            xlim = c(50,250))
+# Experimental Retention Index (RI)
+indexRtime(10.8242, rti)
+# Literature RI = 1239 (NIST#: 412808)
+# ΔRI = 7
 
 ```
 
-Peak of AlignID number 12
 
-```{r echo=TRUE}
 
-plotProfile(peak_iden, 12)
-# Visual inspection:
-# Low quality peak
 
-```
 
-Peak of AlignID number 13
 
-```{r echo=TRUE}
 
-plotProfile(peak_iden, 13)
-# Visual inspection:
-# Good peak shape
 
-```
 
 
 
