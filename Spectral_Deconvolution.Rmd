@@ -177,8 +177,6 @@ write.csv(feat_list,
 
 ```
 
-## Cleaning the identification list
-
 How many metabolites were identified?
 How we are clean the identified compound list?
 
@@ -211,6 +209,12 @@ rti <- data.frame(rtime = c(7.557, 10.006, 12.569, 15.111, 17.581, 19.937,
                              2700, 2800, 2900, 3000, 3100, 3200, 3300))
 
 ```
+
+## Level 1 identification
+
+
+
+## Leval 2 identification
 
 ### 2-Butenoic acid, 3-methyl-
 

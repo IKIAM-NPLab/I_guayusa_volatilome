@@ -1,18 +1,37 @@
 Spectral_Deconvolution
 ================
-Edison Gonzales, Jefferson Pastuna”
+Edison Gonzales, Jefferson Pastuna
 2024-06-09
 
 - <a href="#introduction" id="toc-introduction">Introduction</a>
 - <a href="#before-to-start" id="toc-before-to-start">Before to start</a>
 - <a href="#erah-package-workflow" id="toc-erah-package-workflow">eRah
   package workflow</a>
-- <a href="#cleaning-the-identification-list"
-  id="toc-cleaning-the-identification-list">Cleaning the identification
-  list</a>
-- <a href="#tiglic-acid" id="toc-tiglic-acid">Tiglic acid</a>
+  - <a href="#compound-deconvolution"
+    id="toc-compound-deconvolution">Compound Deconvolution</a>
+  - <a href="#alignment" id="toc-alignment">Alignment</a>
+  - <a href="#missing-compound-recovery"
+    id="toc-missing-compound-recovery">Missing Compound Recovery</a>
+- <a href="#identification" id="toc-identification">Identification</a>
+  - <a href="#cleaning-the-identification-list"
+    id="toc-cleaning-the-identification-list">Cleaning the identification
+    list</a>
+    - <a href="#2-butenoic-acid-3-methyl-"
+      id="toc-2-butenoic-acid-3-methyl-">2-Butenoic acid, 3-methyl-</a>
+    - <a href="#benzoic-acid-ethyl-ester"
+      id="toc-benzoic-acid-ethyl-ester">Benzoic acid, ethyl ester</a>
+    - <a href="#benzoic-acid" id="toc-benzoic-acid">Benzoic acid</a>
+    - <a href="#e-26-dimethylocta-37-diene-26-diol"
+      id="toc-e-26-dimethylocta-37-diene-26-diol">(E)-2,6-Dimethylocta-3,7-diene-2,6-diol</a>
+    - <a href="#catechol" id="toc-catechol">Catechol</a>
+    - <a href="#benzofuran-23-dihydro-"
+      id="toc-benzofuran-23-dihydro-">Benzofuran, 2,3-dihydro-</a>
+    - <a href="#phenol-o-amino-" id="toc-phenol-o-amino-">Phenol, o-amino-</a>
+    - <a href="#1h-pyrrole-25-dione-3-ethyl-4-methyl-"
+      id="toc-1h-pyrrole-25-dione-3-ethyl-4-methyl-">1H-Pyrrole-2,5-dione,
+      3-ethyl-4-methyl-</a>
 
-### Introduction
+# Introduction
 
 Metabolomics has been driven by mass spectrometry technologies such as
 gas chromatography coupled to mass spectrometry (GC-MS), allowing it to
@@ -35,7 +54,7 @@ deconvolution, focusing on blind source separation (BSS), quantification
 and automated identification of sample spectra by comparison with
 spectral libraries.(Domingo-Almenara et al., 2016)
 
-### Before to start
+# Before to start
 
 eRah is a free R package which incorporates a central deconvolution
 method, so it uses multivariate techniques based on blind source
@@ -47,7 +66,7 @@ the compound for each sample. The table shows the compound names,
 coincidence scores and the integrated area of the compound for each
 sample.
 
-### eRah package workflow
+# eRah package workflow
 
 The eRah package is installed and loaded, using “lirary (erah)”.
 
@@ -91,11 +110,14 @@ criteria on peak width and minimum height, noise threshold, and
 excluding certain ranges of m/z values from processing to improve the
 accuracy and relevance of chemical analysis.
 
+## Compound Deconvolution
+
 ``` r
-dec_par <- setDecPar(min.peak.width = 3,
+dec_par <- setDecPar(min.peak.width = 0.7,
                      min.peak.height = 500,
                      noise.threshold = 50,
-                     avoid.processing.mz = c(50:69,73:75,147:149))
+                     avoid.processing.mz = c(59:64,73:75,147:149),
+                     analysis.time = c(3.1,50))
 ```
 
 To carry out a process in parallel we use the “future” package, which
@@ -104,7 +126,7 @@ processing speed simultaneously.
 
 ``` r
 plan(future::multisession,
-     workers = 15)
+     workers = 14)
 ```
 
 We proceed to the deconvolution of compounds in the experimental data
@@ -421,17 +443,21 @@ dec_data <- deconvolveComp(raw_data,
 
     ## Compounds deconvolved
 
+## Alignment
+
 Parameters are defined for alignment and applied to the data.
 
 ``` r
 # Alignment parameters
 alig_par <- setAlPar(min.spectra.cor = 0.9,
-                     max.time.dist = 3,
+                     max.time.dist = 5,
                      mz.range = 50:500)
 # Alignment
 peak_alig <- alignComp(dec_data,
                        alParameters = alig_par)
 ```
+
+## Missing Compound Recovery
 
 By means of the “recMissComp” function it is used to recover missing
 compounds in spectral data, which allows the general model to be
@@ -448,7 +474,7 @@ peak_find <- recMissComp(peak_alig,
     ##  Updating alignment table... 
     ## Model fitted!
 
-Identification
+# Identification
 
 ``` r
 # Loading NIST 20 (*.msp) library
@@ -465,7 +491,7 @@ mslib <- nist.database
 peak_iden <- identifyComp(peak_find,
                           id.database = mslib,
                           mz.range = NULL,
-                          n.putative = 20)
+                          n.putative = 1)
 ```
 
     ## Constructing matrix database... 
@@ -476,11 +502,32 @@ peak_iden <- identifyComp(peak_find,
 # Identified compounds list
 id_list <- idList(peak_iden)
 # Exporting identified compounds list
-#write.csv(id_list,
-#          file = "Result/eRah_Result/NIST_Identification.csv")
+write.csv(id_list,
+          file = "Result/eRah_Result/NIST_Identification.csv")
 ```
 
-### Cleaning the identification list
+Exporting spectra to NIST identification.
+
+``` r
+export2MSP(peak_iden,
+           store.path = "Result/eRah_Result",
+           alg.version = 2)
+```
+
+    ## Spectra saved at: Result/eRah_Result/ExportMSP
+
+Exporting feature list to statistical analysis.
+
+``` r
+# Extracting alignment feature list
+feat_list <- alignList(peak_iden,
+                       by.area = FALSE)
+# Exporting alignment feature list
+write.csv(feat_list,
+          file = "Result/eRah_Result/erah_Export_2Notame.csv")
+```
+
+## Cleaning the identification list
 
 How many metabolites were identified? How we are clean the identified
 compound list?
@@ -511,54 +558,271 @@ rti <- data.frame(rtime = c(7.557, 10.006, 12.569, 15.111, 17.581, 19.937,
                              2700, 2800, 2900, 3000, 3100, 3200, 3300))
 ```
 
-Peak of AlignID number 1
+### 2-Butenoic acid, 3-methyl-
+
+Mirror plot of alignID number 7
 
 ``` r
-plotProfile(peak_iden, 1)
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
-
-``` r
-# Visual inspection:
-# Low quality peak
-```
-
-# Tiglic acid
-
-Peak of AlignID number 44
-
-``` r
-plotProfile(peak_iden, 44)
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
-
-``` r
-# Visual inspection:
-# Good peak shape
-```
-
-Mirror plot of alignID number 44
-
-``` r
-plotSpectra(peak_iden, 44, 4, draw.color = "red", xlim = c(50,110))
+plotSpectra(peak_iden, 7,
+            draw.color = "red",
+            comp.db = 315647,
+            xlim = c(50,130))
 ```
 
 ![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
-# Experimental RI = 959 (Calculated by GCMSsolution software)
-# Literature RI = 941 (NIST#: 150619)
-# ΔRI = 18
+# Experimental RI = 958 (Calculated by GCMSsolution software)
+# Literature RI = 947 (NIST#: 1105)
+# ΔRI = 11
 ```
 
-Exporting spectra to NIST identification
+### Benzoic acid, ethyl ester
+
+Mirror plot of alignID number 123
 
 ``` r
-export2MSP(peak_iden,
-           store.path = "Result/eRah_Result",
-           alg.version = 2)
+plotSpectra(peak_iden, 123,
+            draw.color = "red",
+            comp.db = 316698,
+            xlim = c(50,160))
 ```
 
-    ## Spectra saved at: Result/eRah_Result/ExportMSP
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(9.0501, rti)
+```
+
+    ## [1] 1160.968
+
+``` r
+# Literature RI = 1172 (NIST#: 150033)
+# ΔRI = 11
+```
+
+### Benzoic acid
+
+Mirror plot of alignID number 124
+
+``` r
+plotSpectra(peak_iden, 124,
+            draw.color = "red",
+            comp.db = 236,
+            xlim = c(50,160))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(9.049, rti)
+```
+
+    ## [1] 1160.923
+
+``` r
+# Literature RI = 1171 (NIST#: 290514)
+# ΔRI = 10
+```
+
+### (E)-2,6-Dimethylocta-3,7-diene-2,6-diol
+
+Mirror plot of alignID number 133
+
+``` r
+plotSpectra(peak_iden, 133,
+            draw.color = "red",
+            comp.db = 265239,
+            xlim = c(50,140))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(9.7654, rti)
+```
+
+    ## [1] 1190.176
+
+``` r
+# Literature RI = 1191 (NIST#: 412424)
+# ΔRI = 1
+```
+
+(E)-2,6-Dimethylocta-3,7-diene-2,6-diol
+
+Mirror plot of alignID number 134
+
+``` r
+plotSpectra(peak_iden, 134,
+            draw.color = "red",
+            comp.db = 265239,
+            xlim = c(50,140))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(9.7659, rti)
+```
+
+    ## [1] 1190.196
+
+``` r
+# Literature RI = 1191 (NIST#: 412424)
+# ΔRI = 1
+```
+
+### Catechol
+
+Mirror plot of alignID number 140
+
+``` r
+plotSpectra(peak_iden, 140,
+            draw.color = "red",
+            comp.db = 8672,
+            xlim = c(50,130))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(9.9673, rti)
+```
+
+    ## [1] 1198.42
+
+``` r
+# Literature RI = 1209 (NIST#: 227771)
+# ΔRI = 11
+```
+
+Catechol
+
+Mirror plot of alignID number 141
+
+``` r
+plotSpectra(peak_iden, 141,
+            draw.color = "red",
+            comp.db = 8672,
+            xlim = c(50,130))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(9.9682, rti)
+```
+
+    ## [1] 1198.457
+
+``` r
+# Literature RI = 1209 (NIST#: 227771)
+# ΔRI = 11
+```
+
+### Benzofuran, 2,3-dihydro-
+
+Mirror plot of alignID number 152
+
+``` r
+plotSpectra(peak_iden, 152,
+            draw.color = "red",
+            comp.db = 27705,
+            xlim = c(50,160))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(10.4657, rti)
+```
+
+    ## [1] 1217.936
+
+``` r
+# Literature RI = 1224 (NIST#: 477791)
+# ΔRI = 6
+```
+
+Benzofuran, 2,3-dihydro-
+
+Mirror plot of alignID number 154
+
+``` r
+plotSpectra(peak_iden, 154,
+            draw.color = "red",
+            comp.db = 27705,
+            xlim = c(50,160))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(10.4718, rti)
+```
+
+    ## [1] 1218.174
+
+``` r
+# Literature RI = 1224 (NIST#: 477791)
+# ΔRI = 6
+```
+
+### Phenol, o-amino-
+
+Mirror plot of alignID number 156
+
+``` r
+plotSpectra(peak_iden, 156,
+            draw.color = "red",
+            comp.db = 318455,
+            xlim = c(50,160))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(10.3802, rti)
+```
+
+    ## [1] 1214.6
+
+``` r
+# Literature RI = 1215 (NIST#: 290667)
+# ΔRI = 0
+```
+
+### 1H-Pyrrole-2,5-dione, 3-ethyl-4-methyl-
+
+Mirror plot of alignID number 178
+
+``` r
+plotSpectra(peak_iden, 178,
+            draw.color = "red",
+            comp.db = 61858,
+            xlim = c(50,250))
+```
+
+![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+
+``` r
+# Experimental Retention Index (RI)
+indexRtime(10.8242, rti)
+```
+
+    ## [1] 1231.924
+
+``` r
+# Literature RI = 1239 (NIST#: 412808)
+# ΔRI = 7
+```
