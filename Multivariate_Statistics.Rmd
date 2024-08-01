@@ -58,7 +58,7 @@ Next...
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-data <- read_from_excel(file = "Data/Data_to_notame/erah_Feature_List_2Notame.xlsx", sheet = 2, 
+data <- read_from_excel(file = "Data/Data_to_notame/MSHub_Feature_List_2Notame.xlsx", sheet = 2, 
                         corner_row = 11, corner_column = "G", 
                         split_by = c("Column", "Ion mode"))
 
@@ -160,7 +160,7 @@ corrected_no_blank <- corrected_no_blank[, corrected_no_blank$Group != "Blank"]
 
 # Exporting data to clean identified features
 write_to_excel(corrected_no_blank,
-               "Result/notame_Result/erah_corrected_no_blank.xlsx")
+               "Result/notame_Result/MSHub_corrected_no_blank.xlsx")
 
 ```
 

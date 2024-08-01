@@ -106,7 +106,7 @@ Parameters are defined for alignment and applied to the data.
 ```{r echo=TRUE}
 
 # Alignment parameters
-alig_par <- setAlPar(min.spectra.cor = 0.9,
+alig_par <- setAlPar(min.spectra.cor = 0.70,
                      max.time.dist = 5,
                      mz.range = 50:500)
 # Alignment
@@ -149,8 +149,8 @@ peak_iden <- identifyComp(peak_find,
 # Identified compounds list
 id_list <- idList(peak_iden)
 # Exporting identified compounds list
-write.csv(id_list,
-          file = "Result/eRah_Result/NIST_Identification.csv")
+#write.csv(id_list,
+#          file = "Result/eRah_Result/NIST_Identification.csv")
 
 ```
 
@@ -158,9 +158,9 @@ Exporting spectra to NIST identification.
 
 ```{r echo=TRUE}
 
-export2MSP(peak_iden,
-           store.path = "Result/eRah_Result",
-           alg.version = 2)
+#export2MSP(peak_iden,
+#           store.path = "Result/eRah_Result",
+#           alg.version = 2)
 
 ```
 
@@ -169,11 +169,11 @@ Exporting feature list to statistical analysis.
 ```{r echo=TRUE}
 
 # Extracting alignment feature list
-feat_list <- alignList(peak_iden,
+feat_list <- alignList(peak_find,
                        by.area = FALSE)
 # Exporting alignment feature list
-write.csv(feat_list,
-          file = "Result/eRah_Result/erah_Export_2Notame.csv")
+#write.csv(feat_list,
+#          file = "Result/eRah_Result/erah_Export_2Notame.csv")
 
 ```
 
@@ -216,7 +216,23 @@ rti <- data.frame(rtime = c(7.557, 10.006, 12.569, 15.111, 17.581, 19.937,
 
 ## Leval 2 identification
 
-### 2-Butenoic acid, 3-methyl-
+### Tiglic acid
+
+Mirror plot of  alignID number 6
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 6,
+            draw.color = "red",
+            comp.db = 315495,
+            xlim = c(50,120))
+# Experimental RI = 941 (Calculated by MS-DIAL software)
+# Literature RI = 941 (NIST#: 230359)
+# ΔRI = 0
+
+```
+
+Tiglic acid
 
 Mirror plot of  alignID number 7
 
@@ -224,13 +240,80 @@ Mirror plot of  alignID number 7
 
 plotSpectra(peak_iden, 7,
             draw.color = "red",
-            comp.db = 315647,
-            xlim = c(50,130))
-# Experimental RI = 958 (Calculated by GCMSsolution software)
-# Literature RI = 947 (NIST#: 1105)
-# ΔRI = 11
+            comp.db = 315495,
+            xlim = c(50,120))
+# Experimental RI = 941 (Calculated by MS-DIAL software)
+# Literature RI = 941 (NIST#: 230359)
+# ΔRI = 0
 
 ```
+
+Tiglic acid
+
+Mirror plot of  alignID number 8
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 8,
+            draw.color = "red",
+            comp.db = 315495,
+            xlim = c(50,120))
+# Experimental RI = 941 (Calculated by MS-DIAL software)
+# Literature RI = 941 (NIST#: 230359)
+# ΔRI = 0
+
+```
+
+Tiglic acid
+
+Mirror plot of  alignID number 9
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 9,
+            draw.color = "red",
+            comp.db = 315495,
+            xlim = c(50,120))
+# Experimental RI = 941 (Calculated by MS-DIAL software)
+# Literature RI = 941 (NIST#: 230359)
+# ΔRI = 0
+
+```
+
+### 2-Butenoic acid, 3-methyl-
+
+Mirror plot of  alignID number 10
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 10,
+            draw.color = "red",
+            comp.db = 315647,
+            xlim = c(50,135))
+# Experimental RI = 941 (Calculated by MS-DIAL software)
+# Literature RI = 947 (NIST#: 1105)
+# ΔRI = 6
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Benzoic acid, ethyl ester
 
@@ -402,8 +485,195 @@ indexRtime(10.8242, rti)
 
 ```
 
+### Hydroquinone
+
+Mirror plot of  alignID number 228
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 228,
+            draw.color = "red",
+            comp.db = 8775,
+            xlim = c(50,130))
+# Experimental Retention Index (RI)
+indexRtime(11.8193, rti)
+# Literature RI = 1283 (NIST#: 228148)
+# ΔRI = 12
+
+```
+
+Hydroquinone
+
+Mirror plot of  alignID number 231
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 231,
+            draw.color = "red",
+            comp.db = 8775,
+            xlim = c(50,130))
+# Experimental Retention Index (RI)
+indexRtime(11.8256, rti)
+# Literature RI = 1283 (NIST#: 228148)
+# ΔRI = 12
+
+```
+
+Hydroquinone
+
+Mirror plot of  alignID number 232
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 232,
+            draw.color = "red",
+            comp.db = 8775,
+            xlim = c(50,130))
+# Experimental Retention Index (RI)
+indexRtime(11.8273, rti)
+# Literature RI = 1283 (NIST#: 228148)
+# ΔRI = 12
+
+```
+
+### Indole
+
+Mirror plot of  alignID number 238
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 238,
+            draw.color = "red",
+            comp.db = 319921,
+            xlim = c(50,140))
+# Experimental Retention Index (RI)
+indexRtime(12.4853, rti)
+# Literature RI = 1295 (NIST#: 227886)
+# ΔRI = 2
+
+```
+
+Indole
+
+Mirror plot of  alignID number 239
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 239,
+            draw.color = "red",
+            comp.db = 319921,
+            xlim = c(50,140))
+# Experimental Retention Index (RI)
+indexRtime(12.4894, rti)
+# Literature RI = 1295 (NIST#: 227886)
+# ΔRI = 2
+
+```
+
+Indole
+
+Mirror plot of  alignID number 242
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 242,
+            draw.color = "red",
+            comp.db = 319922,
+            xlim = c(50,140))
+# Experimental Retention Index (RI)
+indexRtime(12.4859, rti)
+# Literature RI = 1295 (NIST#: 227886)
+# ΔRI = 2
+
+```
+
+### 2-Methoxy-4-vinylphenol
+
+Mirror plot of  alignID number 252
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 252,
+            draw.color = "red",
+            comp.db = 327652,
+            xlim = c(50,210))
+# Experimental Retention Index (RI)
+indexRtime(12.9991, rti)
+# Literature RI = 1316 (NIST#: 431439)
+# ΔRI = 1
+
+```
+
+2-Methoxy-4-vinylphenol
+
+Mirror plot of  alignID number 253
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 253,
+            draw.color = "red",
+            comp.db = 327652,
+            xlim = c(50,210))
+# Experimental Retention Index (RI)
+indexRtime(13, rti)
+# Literature RI = 1316 (NIST#: 431439)
+# ΔRI = 1
+
+```
+
+Ethanone, 1-(2-hydroxy-5-methylphenyl)-
+
+Mirror plot of  alignID number 254
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 254,
+            draw.color = "red",
+            comp.db = 55545,
+            xlim = c(50,240))
+# Experimental Retention Index (RI)
+indexRtime(13.0013, rti)
+# Literature RI = 1316 (NIST#: 235301)
+# ΔRI = 1
+
+```
+
+2-Methoxy-4-vinylphenol
+
+Mirror plot of  alignID number 255
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 255,
+            draw.color = "red",
+            comp.db = 327652,
+            xlim = c(50,210))
+# Experimental Retention Index (RI)
+indexRtime(12.9997, rti)
+# Literature RI = 1316 (NIST#: 431439)
+# ΔRI = 1
+
+```
 
 
+
+## Leval 3 identification
+
+## 1,2-Cyclopentanedione
+
+Mirror plot of  alignID number 12
+
+```{r echo=TRUE}
+
+plotSpectra(peak_iden, 12,
+            draw.color = "red",
+            comp.db = 292442,
+            xlim = c(50,125))
+# Experimental RI = 951 (Calculated by MS-DIAL software)
+# Literature RI = 934 (NIST#: 162182)
+# ΔRI = 17
+
+```
 
 
 
