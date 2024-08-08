@@ -58,8 +58,8 @@ Next...
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-data <- read_from_excel(file = "Data/Data_to_notame/MSHub_Feature_List_2Notame.xlsx", sheet = 2, 
-                        corner_row = 11, corner_column = "G", 
+data <- read_from_excel(file = "Data/Data_to_notame/MZmine_Feature_List_2Notame.xlsx", sheet = 2, 
+                        corner_row = 11, corner_column = "N", 
                         split_by = c("Column", "Ion mode"))
 
 ```
@@ -153,14 +153,14 @@ Contaminant...
 corrected_no_blank <- flag_contaminants(corrected,
                                         blank_col = "Group",
                                         blank_label = "Blank",
-                                        flag_thresh = 0.38,
+                                        flag_thresh = 0.39,
                                         flag_label = "Contaminant")
 # Removal blank group from dataset
 corrected_no_blank <- corrected_no_blank[, corrected_no_blank$Group != "Blank"]
 
 # Exporting data to clean identified features
-write_to_excel(corrected_no_blank,
-               "Result/notame_Result/MSHub_corrected_no_blank.xlsx")
+#write_to_excel(corrected_no_blank,
+#               "Result/notame_Result/MZmine_corrected_no_blank.xlsx")
 
 ```
 
@@ -175,8 +175,8 @@ no_blank_bp <- plot_sample_boxplots(corrected_no_blank,
 # PCA
 no_blank_pca <- plot_pca(corrected_no_blank,
                       center = TRUE,
-                      shape = "Light_condition",
-                      color = "Light_condition")
+                      shape = "QC",
+                      color = "QC")
 # Plot
 no_blank_pca + no_blank_bp
 
@@ -186,14 +186,19 @@ The next step...
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
+# Clustering correlated features
 clustered <- cluster_features(corrected_no_blank,
-                              rt_window = 1/100,
+                              rt_window = 1/180,
                               corr_thresh = 0.95,
-                              d_thresh = 0.8,
+                              d_thresh = 0.80,
                               #plotting = TRUE,
-                              #prefix = paste0(ppath, "Result/notame_Result/HS_GCMS/Cluster")
+                              #prefix = paste0(ppath, "Result/notame_Result/Cluster")
                               )
+# Extracting representative feature of each cluster
 compressed <- compress_clusters(clustered)
+# Exporting data to inspect identified features
+#write_to_excel(compressed,
+#               "Result/notame_Result/MZmine_compressed.xlsx")
 
 ```
 
@@ -208,8 +213,8 @@ clust_bp <- plot_sample_boxplots(compressed,
 # PCA
 clust_pca <- plot_pca(compressed,
                       center = TRUE,
-                      shape = "Factor",
-                      color = "Factor")
+                      shape = "QC",
+                      color = "QC")
 # Plot
 clust_pca + clust_bp
 
@@ -249,8 +254,8 @@ imp_bp <- plot_sample_boxplots(imputed,
 # PCA
 imp_pca <- plot_pca(imputed,
                     center = TRUE,
-                    shape = "Factor",
-                    color = "Factor")
+                    shape = "QC",
+                    color = "QC")
 # Plot
 imp_pca + imp_bp
 
@@ -274,13 +279,13 @@ We can inspect PCA plot after...
 
 # Boxplot
 pqn_bp <- plot_sample_boxplots(pqn_set,
-                               order_by = "Injection_order",
+                               order_by = "QC",
                                fill_by = "QC")
 # PCA
 pqn_pca <- plot_pca(pqn_set,
                     center = TRUE,
-                    shape = "Factor",
-                    color = "Factor")
+                    shape = "QC",
+                    color = "QC")
 # Plot
 pqn_pca + pqn_bp
 
@@ -353,8 +358,8 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
 ggplot(scores,
        aes(PC1, PC2, shape = Light_in_subQC, color = Light_in_subQC)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (15.49 %)"),
-         y=guide_axis(title = "PC2 (13.03 %)")) +
+  guides(x=guide_axis(title = "PC1 (15.52 %)"),
+         y=guide_axis(title = "PC2 (13.45 %)")) +
   labs(shape = 'Light condition', color= 'Light condition') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -381,8 +386,8 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
 ggplot(scores,
        aes(PC1, PC2, shape = Age_in_subQC, color = Age_in_subQC)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (15.49 %)"),
-         y=guide_axis(title = "PC2 (13.03 %)")) +
+  guides(x=guide_axis(title = "PC1 (15.52 %)"),
+         y=guide_axis(title = "PC2 (13.45 %)")) +
   labs(shape = 'Period age', color= 'Period age') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -409,8 +414,8 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
 ggplot(scores,
        aes(PC1, PC2, shape = Location_in_subQC, color = Location_in_subQC)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (15.49 %)"),
-         y=guide_axis(title = "PC2 (13.03 %)")) +
+  guides(x=guide_axis(title = "PC1 (15.52 %)"),
+         y=guide_axis(title = "PC2 (13.45 %)")) +
   labs(shape = 'Location', color= 'Location') +
   theme_classic() +
   theme(legend.position = c(0.1, 0.18),
@@ -437,30 +442,38 @@ Creating an artificial table with Feature name and Compound column.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
-# Load a metabolite name table
-#metab_name <- readxl::read_excel("Data/GCMS_Metabolites.xlsx", 6)
-# Creating a new small table of the annotated compounds
-#ei_compouds <- left_join(metab_name, loadings)
+# Extracting feature identified
+feat_data <- no_flag[!is.na(no_flag@featureData@data$Metabolite),]
+# Extracting feature data
+feat_data <- feat_data@featureData@data
+# Creating a new small table with the annotated compounds
+ei_compouds <- left_join(feat_data, loadings)
 # Plotting results
 ggplot(loadings, aes(PC1, PC2)) + 
   geom_point(alpha = 0.2) +
   theme_classic() + 
-  geom_point(data = loadings, size = 1) +
-  #ggrepel::geom_label_repel(data = ei_compouds,
-                            #aes(label = Metabolite_name),
-                            #box.padding = 0.8,
-                            #label.padding = 0.3,
-                            #label.r = 0.3,
-                            #cex = 3.7) +
-  guides(x=guide_axis(title = "PC1 (15.49 %)"),
-         y=guide_axis(title = "PC2 (13.03 %)")) +
+  geom_point(data = ei_compouds,
+             aes(shape = feat_data$Identification_level, color = feat_data$Identification_level),
+             size = 2) +
+  labs(shape = 'Identification level', color = 'Identification level') +
+  ggrepel::geom_label_repel(data = ei_compouds,
+                            aes(label = feat_data$Metabolite),
+                            box.padding = 0.37,
+                            label.padding = 0.22,
+                            label.r = 0.3,
+                            cex = 2.5,
+                            max.overlaps = 20) +
+  guides(x=guide_axis(title = "PC1 (15.52 %)"),
+         y=guide_axis(title = "PC2 (13.45 %)")) +
+  theme(legend.position = c(0.945, 0.923),
+        legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
   geom_hline(yintercept = 0, linetype = "longdash", colour="gray") +
   ggsci::scale_color_aaas()
 # Save plot
-#ggsave('Result/GCMS/GCMS_Loadings_to_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+ggsave('Result/notame_Result/GCMS_Loadings_all.pdf', width = 20, height = 10.5, device='pdf', dpi="print")
 
 ```
 
@@ -1015,6 +1028,102 @@ library(colorRamp2)
 # Cowplot package installation
 #install.packages("cowplot")
 library(cowplot)
+
+# ClassyFire package installation
+#remotes::install_github('aberHRML/classyfireR')
+library(classyfireR)
+
+```
+
+ClassyFire metabolite class classification.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+InChI_Keys <- c("NOORESDHJXLGAO-AATRIKPKSA-N",
+                "PGSWEKYNAOWQDF-UHFFFAOYSA-N",
+                "HFLGBNBLMBSXEM-UHFFFAOYSA-N",
+                "ZBCATMYQYDCTIZ-UHFFFAOYSA-N",
+                "YOMSJEATGXXYPX-UHFFFAOYSA-N",
+                "BKASXWPLSXFART-HTQZYQBOSA-N",
+                "XEVQXKKKAVVSMW-UHFFFAOYSA-N",
+                "OJOBTAOGJIWAGB-UHFFFAOYSA-N",
+                "DTUQWGWMVIHBKE-UHFFFAOYSA-N",
+                "WPYMKLBDIGXBTP-UHFFFAOYSA-N",
+                "UEEJDIUOCUCVHN-UHFFFAOYSA-N",
+                "FSSVRXASHHVANB-UHFFFAOYSA-N",
+                "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
+                "QHJGZUSJKGVMTF-UHFFFAOYSA-N",
+                "RQCMOYRPNPEGDL-UHFFFAOYSA-N",
+                "YCIMNLLNPGFGHC-UHFFFAOYSA-N",
+                "JNSUZRHLHDQGPN-HJWRWDBZSA-N",
+                "HBEDSQVIWPRPAY-UHFFFAOYSA-N",
+                "NMEZJSDUZQOPFE-UHFFFAOYSA-N",
+                "CFAKWWQIUFSQFU-UHFFFAOYSA-N",
+                "CFAKWWQIUFSQFU-UHFFFAOYSA-N",
+                "DIOQZVSQGTUSAI-UHFFFAOYSA-N",
+                "RPEASMBMVIKUTH-UHFFFAOYSA-N",
+                "KNHUHSLRIKTCIY-UHFFFAOYSA-N",
+                "MWOMNLDJNQWJMK-UHFFFAOYSA-N",
+                "PHOPGVYKZWPIGA-UHFFFAOYSA-N",
+                "LIKYNOPXHGPMIH-UHFFFAOYSA-N",
+                "JRXXLCKWQFKACW-UHFFFAOYSA-N",
+                "HOWGUJZVBDQJKV-UHFFFAOYSA-N",
+                "CBFCDTFDPHXCNY-UHFFFAOYSA-N",
+                "UAUDZVJPLUQNMU-KTKRTIGZSA-N",
+                "QVGDVJSCRGIGEX-WAYWQWQTSA-N",
+                "QVGDVJSCRGIGEX-WAYWQWQTSA-N",
+                "XIRNKXNNONJFQO-UHFFFAOYSA-N",
+                "LFVCJQWZGDLHSD-UHFFFAOYSA-N",
+                "LHGVFZTZFXWLCP-UHFFFAOYSA-N",
+                "FNAZRRHPUDJQCJ-UHFFFAOYSA-N",
+                "BJQWYEJQWHSSCJ-UHFFFAOYSA-N",
+                "HMSWAIKSFDFLKN-UHFFFAOYSA-N",
+                "XMIIGOLPHOKFCH-UHFFFAOYSA-N",
+                "QIGBRXMKCJKVMJ-UHFFFAOYSA-N",
+                "SIKJAQJRHWYJAI-UHFFFAOYSA-N",
+                "MGWAVDBGNNKXQV-UHFFFAOYSA-N",
+                "TWNIBLMWSKIRAT-BYIBVSMXSA-N",
+                "NITWSHWHQAQBAW-QPJJXVBHSA-N",
+                "YZEGGKQFWJCIQG-UHFFFAOYSA-N",
+                "HLMFEOFHBFXLNZ-UHFFFAOYSA-N",
+                "WTTJVINHCBCLGX-ZDVGBALWSA-N",
+                "UQDUPQYQJKYHQI-UHFFFAOYSA-N",
+                "DVWSXZIHSUZZKJ-YSTUJMKBSA-N",
+                "QYDYPVFESGNLHU-KHPPLWFESA-N",
+                "FLIACVVOZYBSBS-UHFFFAOYSA-N",
+                "IZFGRAGOVZCUFB-CMDGGOBGSA-N",
+                "IZFGRAGOVZCUFB-CMDGGOBGSA-N",
+                "LFHHOHMIVKIHMG-UHFFFAOYSA-N",
+                "LFHHOHMIVKIHMG-UHFFFAOYSA-N",
+                "CUBICSJJYOPOIA-UHFFFAOYSA-N",
+                "LQERIDTXQFOHKA-UHFFFAOYSA-N",
+                "YNPDFBFVMJNGKZ-UHFFFAOYSA-N",
+                "RZJRJXONCZWCBN-UHFFFAOYSA-N",
+                "IPCSVZSSVZVIGE-UHFFFAOYSA-N",
+                "YKNWIILGEFFOPE-UHFFFAOYSA-N",
+                "ISWSIDIOOBJBQZ-UHFFFAOYSA-N",
+                "WRMNZCZEMHIOCP-UHFFFAOYSA-N",
+                "BOTWFXYSPFMFNR-HMMYKYKNSA-N",
+                "UUTGCNVYKLQLRV-UHFFFAOYSA-N",
+                "YYPNJNDODFVZLE-UHFFFAOYSA-N",
+                "YYGNTYWPHWGJRM-AAJYLUCBSA-N",
+                "YYGNTYWPHWGJRM-AAJYLUCBSA-N",
+                "LZFOPEXOUVTGJS-ONEGZZNKSA-N",
+                "KLIDCXVFHGNTTM-UHFFFAOYSA-N",
+                "POOSGDOYLQNASK-UHFFFAOYSA-N",
+                "YAPQBXQYLJRXSA-UHFFFAOYSA-N",
+                "YAPQBXQYLJRXSA-UHFFFAOYSA-N",
+                "YAPQBXQYLJRXSA-UHFFFAOYSA-N",
+                "YAPQBXQYLJRXSA-UHFFFAOYSA-N",
+                "ZFXYFBGIUFBOJW-UHFFFAOYSA-N",
+                "UIERETOOQGIECD-ONEGZZNKSA-N",
+                "UIERETOOQGIECD-ONEGZZNKSA-N",
+                "YFHOHYAUMDHSBX-SNAWJCMRSA-N",
+                "RSJKGSCJYJTIGS-UHFFFAOYSA-N",
+                "MWOOGOJBHIARFG-UHFFFAOYSA-N",
+                "XDVDHFJMCJWDPI-UHFFFAOYSA-N")
+Classification_List <- purrr::map(InChI_Keys, get_classification)
+show(Classification_List)
 
 ```
 
