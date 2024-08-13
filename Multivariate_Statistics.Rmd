@@ -59,7 +59,7 @@ Next...
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 data <- read_from_excel(file = "Data/Data_to_notame/MZmine_Feature_List_2Notame.xlsx", sheet = 2, 
-                        corner_row = 11, corner_column = "N", 
+                        corner_row = 8, corner_column = "N", 
                         split_by = c("Column", "Ion mode"))
 
 ```
@@ -354,19 +354,37 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data )                 # Adding metadata
+# Change the order of legend column of DataFrame
+scores$Light_factor <- factor(scores$Light_factor,
+                              levels = c("Light",
+                                         "Shade",
+                                         "Other factor",
+                                         "QC"))
+scores$Analysis_group <- factor(scores$Analysis_group,
+                                levels = c("Sample",
+                                           "Sub_Quality_Control",
+                                           "QC"),
+                                labels=c("Sample",
+                                         "SubQC",
+                                         "QC"))
 # PCA plot
 figure_s1a <- ggplot(scores,
-                     aes(PC1, PC2, shape = Light_in_subQC,
-                         color = Light_in_subQC)) +
-  scale_color_manual(values=c("#F5BC5CFF", "#7CAE00", "#00BFC4", "#32373AFF")) +
-  scale_shape_manual(values=c(8, 1, 15, 8)) +
+                     aes(PC1, PC2, shape = Analysis_group,
+                         color = Light_factor)) +
+  scale_color_manual(values=c("#F5BC5CFF",
+                              "#32373AFF",
+                              "#D3D9D9FF",
+                              "#00BFC4")) +
+  scale_shape_manual(values=c(1, 17, 15)) +
   geom_point(size = 3) +
   guides(x=guide_axis(title = "PC1 (15.52 %)"),
-         y=guide_axis(title = "PC2 (13.45 %)")) +
-  labs(shape = 'Light condition', color= 'Light condition') +
+         y=guide_axis(title = "PC2 (13.45 %)"),
+         shape = guide_legend(order = 2),
+         color = guide_legend(order = 1)) +
+  labs(shape = 'Analysis group', color= 'Light level') +
   theme_classic() +
-  theme(legend.position = c(0.88, 0.80),
-        legend.background = element_rect(fill = "white", color = "black")) +
+#  theme(legend.position = c(0.88, 0.80),
+#        legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(),
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
@@ -387,19 +405,39 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data )                 # Adding metadata
+# Change the order of legend column of DataFrame
+scores$Age_factor <- factor(scores$Age_factor,
+                 levels = c("Early",
+                            "Medium",
+                            "Late",
+                            "Other factor",
+                            "QC"))
+scores$Analysis_group <- factor(scores$Analysis_group,
+                 levels = c("Sample",
+                            "Sub_Quality_Control",
+                            "QC"),
+                 labels=c("Sample",
+                          "SubQC",
+                          "QC"))
 # PCA plot
 figure_s1b <- ggplot(scores,
-                     aes(PC1, PC2, shape = Age_in_subQC,
-                         color = Age_in_subQC)) +
-  scale_color_manual(values=c("#E76BF3", "#4457A5FF", "#F8766D", "#7CAE00", "#00BFC4")) +
-  scale_shape_manual(values=c(17, 17, 17, 1, 15)) + 
+                     aes(PC1, PC2, shape = Analysis_group,
+                         color = Age_factor)) +
+  scale_color_manual(values=c("#E76BF3",
+                              "#00B0F6",
+                              "#F8766D",
+                              "#D3D9D9FF",
+                              "#00BFC4")) +
+  scale_shape_manual(values=c(1, 17, 15)) + 
   geom_point(size = 3) +
   guides(x=guide_axis(title = "PC1 (15.52 %)"),
-         y=guide_axis(title = "PC2 (13.45 %)")) +
-  labs(shape = 'Period age', color= 'Period age') +
+         y=guide_axis(title = "PC2 (13.45 %)"),
+         shape = guide_legend(order = 2),
+         color = guide_legend(order = 1)) +
+  labs(shape = 'Analysis group', color= 'Age level') +
   theme_classic() +
-  theme(legend.position = c(0.88, 0.77),
-        legend.background = element_rect(fill = "white", color = "black")) +
+#  theme(legend.position = c(0.88, 0.77),
+#        legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(),
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
@@ -420,20 +458,37 @@ scores <- ei_pca$x %>%                   # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data )                 # Adding metadata
+# Change the order of legend column of DataFrame
+scores$Location_factor <- factor(scores$Location_factor,
+                 levels = c("Alto Pano",
+                            "Alto Tena",
+                            "Talag",
+                            "Other factor",
+                            "QC"))
+scores$Analysis_group <- factor(scores$Analysis_group,
+                 levels = c("Sample",
+                            "Sub_Quality_Control",
+                            "QC"),
+                 labels=c("Sample",
+                          "SubQC",
+                          "QC"))
 # PCA plot
 figure_s1c <- ggplot(scores,
-                     aes(PC1, PC2, shape = Location_in_subQC,
-                         color = Location_in_subQC)) +
-  scale_color_manual(values=c("#00B0F6", "#F8766D", "#7CAE00", "#00BFC4", "#E76BF3")) +
-#  scale_color_manual(values=c("#F8766D", "#A3A500", "#E76BF3", "#00BF7D", "#00B0F6")) +
-  scale_shape_manual(values=c(7, 7, 1, 15, 7)) + 
+                     aes(PC1, PC2, shape = Analysis_group,
+                         color = Location_factor)) +
+  scale_color_manual(values=c("#B24422FF",
+                              "#4F9D4EFF",
+                              "#4457A5FF",
+                              "#D3D9D9FF",
+                              "#00BFC4")) +
+  scale_shape_manual(values=c(1, 17, 15)) + 
   geom_point(size = 3) +
   guides(x=guide_axis(title = "PC1 (15.52 %)"),
          y=guide_axis(title = "PC2 (13.45 %)")) +
-  labs(shape = 'Location', color= 'Location') +
+  labs(shape = 'Analysis group', color= 'Location level') +
   theme_classic() +
-  theme(legend.position = c(0.88, 0.77),
-        legend.background = element_rect(fill = "white", color = "black")) +
+#  theme(legend.position = c(0.88, 0.77),
+#        legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(),
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
@@ -444,6 +499,76 @@ figure_s1c
 #       width = 5, height = 4, device='pdf', dpi="print")
 
 ```
+
+
+
+SubQC PCA plot
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# PCA scores
+scores <- ei_pca$x %>%                   # Get PC coordinates
+  data.frame %>%                         # Convert to data frames
+  mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
+  left_join(pheno_data )                 # Adding metadata
+# Change the order of legend column of DataFrame
+scores$Level_in_subQC <- factor(scores$Level_in_subQC,
+                 levels = c("Alto Pano",
+                            "Alto Tena",
+                            "Talag",
+                            "Early",
+                            "Medium",
+                            "Late",
+                            "Light",
+                            "Shade",
+                            "Sample",
+                            "QC"),
+                 labels=c("Alto Pano",
+                            "Alto Tena",
+                            "Talag",
+                            "Early",
+                            "Medium",
+                            "Late",
+                            "Light",
+                            "Shade",
+                            "Sample",
+                            "QC"))
+# PCA plot
+figure_s1e <- ggplot(scores,
+                     aes(PC1, PC2, shape = Level_in_subQC,
+                         color = Level_in_subQC)) +
+  scale_color_manual(values=c("#00B0F6",
+                              "#F8766D",
+                              "#E76BF3",
+                              "#B24422FF",
+                              "#59386CFF",
+                              "#4457A5FF",
+                              "#F5BC5CFF",
+                              "#32373AFF",
+                              "#7CAE00",
+                              "#00BFC4")) +
+  scale_shape_manual(values=c(17, 17, 17, 16, 16, 16, 8, 8, 3, 15)) + 
+  geom_point(size = 3) +
+  guides(x=guide_axis(title = "PC1 (15.52 %)"),
+         y=guide_axis(title = "PC2 (13.45 %)")) +
+  labs(shape = 'SubQC', color= 'SubQC') +
+  theme_classic() +
+  theme(legend.position = c(0.88, 0.77),
+        legend.background = element_rect(fill = "white", color = "black")) +
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(fill= "transparent")) +
+  geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
+  geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+figure_s1e
+# Save plot
+#ggsave('Result/notame_Result/Figure_s1e.pdf',
+#       width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+
+
+
 
 Plotting loading results.
 
@@ -613,8 +738,8 @@ figure_1c <- ggplot(scores1,
                     aes(PC1, PC2, shape = Location_in_samples,
                         color = Location_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (17.48 %)"),
-         y=guide_axis(title = "PC2 (13.68 %)")) +
+  guides(x=guide_axis(title = "PC1 (17.41 %)"),
+         y=guide_axis(title = "PC2 (14.19 %)")) +
   labs(shape = 'Location', color='Location') +
   theme_classic() +
   theme(legend.position = c(0.88, 0.77),
@@ -641,32 +766,44 @@ loadings1 <- ei_pca1$rotation %>%       # Extract loadings
 
 Creating an artificial table with Feature name and Compound column.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide', fig.width = 20, fig.height = 10.5}
 
-# Load a metabolite name table
-#metab_name <- readxl::read_excel("Data/GCMS_Metabolites.xlsx", 6)
-# Creating a new small table of the annotated compounds
-#ei_compouds <- left_join(metab_name, loadings)
+# Extracting feature identified
+feat_data1 <- no_flag1[!is.na(no_flag1@featureData@data$Metabolite),]
+# Extracting feature data
+feat_data1 <- feat_data1@featureData@data
+# Creating a new small table with the annotated compounds
+ei_compouds1 <- left_join(feat_data1, loadings1)
 # Plotting results
-ggplot(loadings1, aes(PC1, PC2)) + 
+figure_1d <- ggplot(loadings1, aes(PC1, PC2)) +
   geom_point(alpha = 0.2) +
   theme_classic() + 
-  geom_point(data = loadings1, size = 1) +
-  #ggrepel::geom_label_repel(data = ei_compouds,
-                            #aes(label = Metabolite_name),
-                            #box.padding = 0.8,
-                            #label.padding = 0.3,
-                            #label.r = 0.3,
-                            #cex = 3.7) +
-  guides(x=guide_axis(title = "PC1 (17.48 %)"),
-         y=guide_axis(title = "PC2 (13.68 %)")) +
+  geom_point(data = ei_compouds1,
+             aes(shape = feat_data1$Identification_level,
+                 color = feat_data1$Identification_level),
+             size = 2) +
+  labs(shape = 'Identification level',
+       color = 'Identification level') +
+  ggrepel::geom_label_repel(data = ei_compouds1,
+                            aes(label = feat_data1$Metabolite),
+                            box.padding = 0.37,
+                            label.padding = 0.22,
+                            label.r = 0.30,
+                            cex = 2.5,
+                            max.overlaps = 20) +
+  guides(x=guide_axis(title = "PC1 (17.41 %)"),
+         y=guide_axis(title = "PC2 (14.19 %)")) +
+  theme(legend.position = c(0.945, 0.923),
+        legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
   geom_hline(yintercept = 0, linetype = "longdash", colour="gray") +
   ggsci::scale_color_aaas()
+figure_1d
 # Save plot
-#ggsave('Result/GCMS/GCMS_Loadings_to_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+#ggsave('Result/notame_Result/figure_1d.pdf',
+#       width = 5, height = 4, device='pdf', dpi="print")
 
 ```
 
@@ -680,9 +817,9 @@ ggplot(loadings1, aes(PC1, PC2)) +
 
 
 
-### PCA of each location
+## PCA of each location
 
-Alto Pano
+### Alto Pano
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
@@ -694,7 +831,7 @@ b_data  <- drop_flagged(b_data)
 # Extracting feature height table
 peak_height2 <- exprs(b_data )
 # Extracting Phenotipic data
-pheno_data2 <- b_data @phenoData@data
+pheno_data2 <- b_data@phenoData@data
 
 ```
 
@@ -706,11 +843,9 @@ The next step is...
 pmp_data2 <- SummarizedExperiment(assays = peak_height2,
                                   colData = pheno_data2)
 # Generalized logarithmic transform
-glog_set2 <- glog_transformation (df = pmp_data2@assays@data@listData[[1]],
-                                  classes = pmp_data2$QC,
-                                  qc_label = "QC")
-
-
+glog_set2 <- glog_transformation(df = pmp_data2@assays@data@listData[[1]],
+                                 classes = pmp_data2$QC,
+                                 qc_label = "QC")
 
 ```
 
@@ -727,8 +862,6 @@ ei_pca2 <- prcomp(transp_table2, center = TRUE, scale. = TRUE)
 
 Plotting PCA results.
 
-Light level PCA plot
-
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
@@ -737,21 +870,25 @@ scores2 <- ei_pca2$x %>%                 # Get PC coordinates
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data2)                 # Adding metadata
 # PCA plot
-ggplot(scores2,
-       aes(PC1, PC2, shape = Age_in_samples, color = Light_in_samples)) +
+figure_2a <- ggplot(scores2,
+                    aes(PC1, PC2, shape = Age_in_samples,
+                        color = Light_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (26.15 %)"),
-         y=guide_axis(title = "PC2 (18.34 %)")) +
-  labs(shape = 'Period age', color='Light condition') +
+  guides(x=guide_axis(title = "PC1 (26.25 %)"),
+         y=guide_axis(title = "PC2 (18.82 %)")) +
+  labs(shape = 'Period age',
+       color='Light condition') +
   theme_classic() +
-  theme(legend.position = c(0.1, 0.18),
+  theme(legend.position = c(0.90, 0.65),
         legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
   geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+figure_2a
 # Save plot
-#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+#ggsave('Result/notame_Result/figure_2a.pdf',
+#       width = 5, height = 4, device='pdf', dpi="print")
 
 ```
 
@@ -801,11 +938,11 @@ ggplot(loadings2, aes(PC1, PC2)) +
 
 
 
-Alto Tena
+### Alto Tena
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
-# Extracting "Alto Pano" (B) data
+# Extracting "Alto Tena" (C) data
 c_data <- no_subqc[, no_subqc$Location_in_samples != "Alto Pano"]
 c_data <- c_data[, c_data$Location_in_samples != "Talag"]
 # Extracting clean data
@@ -813,7 +950,7 @@ c_data  <- drop_flagged(c_data)
 # Extracting feature height table
 peak_height3 <- exprs(c_data )
 # Extracting Phenotipic data
-pheno_data3 <- c_data @phenoData@data
+pheno_data3 <- c_data@phenoData@data
 
 ```
 
@@ -847,27 +984,30 @@ Plotting PCA results.
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores3 <- ei_pca3$x %>%                  # Get PC coordinates
+scores3 <- ei_pca3$x %>%                 # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data3)                 # Adding metadata
 # PCA plot
-ggplot(scores3,
-       aes(PC1, PC2, shape = Age_in_samples, color = Light_in_samples)) +
+figure_2b <- ggplot(scores3,
+                    aes(PC1, PC2, shape = Age_in_samples,
+                        color = Light_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (22.04 %)"),
-         y=guide_axis(title = "PC2 (13.82 %)")) +
+  guides(x=guide_axis(title = "PC1 (22.16 %)"),
+         y=guide_axis(title = "PC2 (13.74 %)")) +
   labs(shape = 'Period age', color='Light condition') +
   labs(shape = 'Group', color='Group') +
   theme_classic() +
-  theme(legend.position = c(0.1, 0.18),
+  theme(legend.position = c(0.08, 0.65),
         legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
   geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+figure_2b
 # Save plot
-#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+#ggsave('Result/notame_Result/figure_2b.pdf',
+#       width = 5, height = 4, device='pdf', dpi="print")
 
 ```
 
@@ -915,11 +1055,11 @@ ggplot(loadings3, aes(PC1, PC2)) +
 
 
 
-Talag
+### Talag
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
-# Extracting "Alto Pano" (B) data
+# Extracting "Talag" (A) data
 a_data <- no_subqc[, no_subqc$Location_in_samples != "Alto Pano"]
 a_data <- a_data[, a_data$Location_in_samples != "Alto Tena"]
 # Extracting clean data
@@ -968,21 +1108,24 @@ scores4 <- ei_pca4$x %>%                  # Get PC coordinates
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
   left_join(pheno_data4)                 # Adding metadata
 # PCA plot
-ggplot(scores4,
-       aes(PC1, PC2, shape = Age_in_samples, color = Light_in_samples)) +
+figure_2c <- ggplot(scores4,
+                    aes(PC1, PC2, shape = Age_in_samples,
+                        color = Light_in_samples)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (24.55 %)"),
-         y=guide_axis(title = "PC2 (16.61 %)")) +
+  guides(x=guide_axis(title = "PC1 (25.06 %)"),
+         y=guide_axis(title = "PC2 (16.53 %)")) +
   labs(shape = 'Period age', color='Light condition') +
   theme_classic() +
-  theme(legend.position = c(0.1, 0.18),
+  theme(legend.position = c(1.08, 0.65),
         legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
         panel.border = element_rect(fill= "transparent")) +
   geom_vline(xintercept = 0, linetype = "longdash", colour="gray") +
   geom_hline(yintercept = 0, linetype = "longdash", colour="gray")
+figure_2c
 # Save plot
-#ggsave('Result/GCMS/GCMS_PCA_To_DQ.pdf', width = 5, height = 4, device='pdf', dpi="print")
+#ggsave('Result/notame_Result/figure_2c.pdf',
+#       width = 5, height = 4, device='pdf', dpi="print")
 
 ```
 
@@ -1265,6 +1408,36 @@ gcms_hm
 
 # Exporting plot
 
+## PCA plot of sample
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
+# Figure matrix
+figure_1 <- arrangeGrob(figure_1a,
+                         figure_1b,
+                         figure_1c,
+                         figure_1d,
+                         layout_matrix = rbind(c(1, 2, 3),
+                                               c(4, 4, 4),
+                                               c(4, 4, 4)))
+# Adding label to the figures
+figure_one <- ggpubr::as_ggplot(figure_1) +
+  draw_plot_label(label = LETTERS[1:4],
+                  x = c(0, 0.35, 0.65, 0),
+                  y = c(.99, .99, .99, .600))
+# Exporting (*.pdf) file
+ggsave(filename = "Result/notame_Result/figure_1.pdf", plot = figure_one,
+      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
+# Exporting (*.png) file
+ggsave(filename = "Result/notame_Result/figure_1.png", plot = figure_sone,
+      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
+# Exporting (*.jpg) file
+#ggsave(filename = "Result/notame_Result/figure_s1.jpg", plot = figure_sone,
+#      width = 116, height = 90, units = "mm", dpi = 300, scale = 2.5)
+
+```
+
+
 ## PCA plot of subQC samples
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
@@ -1276,13 +1449,15 @@ library(cowplot)
 figure_s1 <- arrangeGrob(figure_s1a,
                          figure_s1b,
                          figure_s1c,
-                         layout_matrix = rbind(c(1, 1, 2, 2),
-                                               c(NA, 3, 3, NA)))
+                         figure_s1d,
+                         layout_matrix = rbind(c(1, 2, 3),
+                                               c(4, 4, 4),
+                                               c(4, 4, 4)))
 # Adding label to the figures
 figure_sone <- ggpubr::as_ggplot(figure_s1) +
-  draw_plot_label(label = LETTERS[1:3],
-                  x = c(0, 0.50, 0.25),
-                  y = c(.99, .99, .495))
+  draw_plot_label(label = LETTERS[1:4],
+                  x = c(0, 0.35, 0.655, 0),
+                  y = c(.99, .99, .99, .60))
 # Exporting (*.pdf) file
 ggsave(filename = "Result/notame_Result/figure_s1.pdf", plot = figure_sone,
       width = 140, height = 90, units = "mm", dpi = 300, scale = 2.5)
@@ -1294,36 +1469,6 @@ ggsave(filename = "Result/notame_Result/figure_s1.png", plot = figure_sone,
 #      width = 140, height = 90, units = "mm", dpi = 300, scale = 2.5)
 
 ```
-
-## PCA plot of sample
-
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
-
-# Figure matrix
-figure_s1 <- arrangeGrob(figure_s1a,
-                         figure_s1b,
-                         figure_s1c,
-                         figure_s1d,
-                         layout_matrix = rbind(c(1, 2, 3),
-                                               c(4, 4, 4),
-                                               c(4, 4, 4)))
-# Adding label to the figures
-figure_sone <- ggpubr::as_ggplot(figure_s1) +
-  draw_plot_label(label = LETTERS[1:4],
-                  x = c(0, 0.35, 0.65, 0),
-                  y = c(.99, .99, .99, .600))
-# Exporting (*.pdf) file
-ggsave(filename = "Result/notame_Result/figure_s1.pdf", plot = figure_sone,
-      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
-# Exporting (*.png) file
-#ggsave(filename = "Result/notame_Result/figure_s1.png", plot = figure_sone,
-#      width = 116, height = 90, units = "mm", dpi = 300, scale = 2.5)
-# Exporting (*.jpg) file
-#ggsave(filename = "Result/notame_Result/figure_s1.jpg", plot = figure_sone,
-#      width = 116, height = 90, units = "mm", dpi = 300, scale = 2.5)
-
-```
-
 
 
 
