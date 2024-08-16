@@ -2066,3 +2066,60 @@ INFO [2024-08-12 16:44:06] Random forest imputation finished at 2024-08-12 16:44
 
 INFO [2024-08-12 16:46:18] Starting PQN normalization
 INFO [2024-08-12 16:46:18] Using median of qc samples as reference spectrum
+INFO [2024-08-15 09:24:56] Starting PQN normalization
+INFO [2024-08-15 09:25:01] Starting PQN normalization
+INFO [2024-08-15 09:25:02] Using median of qc samples as reference spectrum
+INFO [2024-08-15 10:52:43] 
+Checking feature information
+INFO [2024-08-15 10:52:43] Checking that feature IDs are unique and not stored as numbers
+INFO [2024-08-15 10:52:43] Checking that feature abundances only contain numeric values
+INFO [2024-08-15 10:52:44] Setting row and column names of exprs based on feature and pheno data
+INFO [2024-08-15 11:23:26] 
+Checking feature information
+INFO [2024-08-15 11:23:26] Checking that feature IDs are unique and not stored as numbers
+INFO [2024-08-15 11:23:26] Checking that feature abundances only contain numeric values
+INFO [2024-08-15 11:23:26] Setting row and column names of exprs based on feature and pheno data
+INFO [2024-08-15 15:27:54] Starting PQN normalization
+INFO [2024-08-15 15:27:54] Using median of qc samples as reference spectrum
+INFO [2024-08-15 16:29:50] Starting PQN normalization
+INFO [2024-08-15 16:29:50] Using median of qc samples as reference spectrum
+INFO [2024-08-15 17:03:40] Starting PQN normalization
+INFO [2024-08-15 17:03:40] Using median of qc samples as reference spectrum
+INFO [2024-08-15 17:27:04] Starting PQN normalization
+INFO [2024-08-15 17:27:04] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:03:35] Starting PQN normalization
+INFO [2024-08-15 19:03:35] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:09:01] Starting PQN normalization
+INFO [2024-08-15 19:09:01] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:10:53] Starting PQN normalization
+INFO [2024-08-15 19:10:53] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:14:20] Starting PQN normalization
+INFO [2024-08-15 19:14:20] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:16:25] Starting PQN normalization
+INFO [2024-08-15 19:16:25] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:17:41] Starting PQN normalization
+INFO [2024-08-15 19:17:41] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:23:14] Starting PQN normalization
+INFO [2024-08-15 19:23:14] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:23:52] Starting PQN normalization
+INFO [2024-08-15 19:23:52] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:24:39] Starting PQN normalization
+INFO [2024-08-15 19:24:39] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:25:38] Starting PQN normalization
+INFO [2024-08-15 19:25:38] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:27:17] Starting PQN normalization
+INFO [2024-08-15 19:27:17] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:33:02] Starting PQN normalization
+INFO [2024-08-15 19:33:02] Using median of qc samples as reference spectrum
+INFO [2024-08-15 19:48:16] Starting PQN normalization
+INFO [2024-08-15 19:48:16] Using median of qc samples as reference spectrum
+INFO [2024-08-16 09:15:13] Starting PQN normalization
+INFO [2024-08-16 09:15:13] Using median of qc samples as reference spectrum
+INFO [2024-08-16 09:18:19] Starting PQN normalization
+INFO [2024-08-16 09:18:19] Using median of qc samples as reference spectrum
+INFO [2024-08-16 09:27:07] Starting PQN normalization
+INFO [2024-08-16 09:27:07] Using median of qc samples as reference spectrum
+INFO [2024-08-16 09:31:46] Starting PQN normalization
+INFO [2024-08-16 09:31:46] Using median of qc samples as reference spectrum
+INFO [2024-08-16 09:32:00] Starting PQN normalization
+INFO [2024-08-16 09:32:00] Using median of qc samples as reference spectrum
