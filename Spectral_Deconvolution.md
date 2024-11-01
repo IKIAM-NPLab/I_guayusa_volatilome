@@ -1,6 +1,6 @@
-Spectral_Deconvolution
+Spectral deconvolution of *Ilex guayusa* GC-MS metabolomics
 ================
-Edison Gonzales, Jefferson Pastuna
+Jefferson Pastuna, Edison Gonzales
 2024-06-09
 
 - <a href="#introduction" id="toc-introduction">Introduction</a>
@@ -13,72 +13,47 @@ Edison Gonzales, Jefferson Pastuna
   - <a href="#missing-compound-recovery"
     id="toc-missing-compound-recovery">Missing Compound Recovery</a>
 - <a href="#identification" id="toc-identification">Identification</a>
-  - <a href="#cleaning-the-identification-list"
-    id="toc-cleaning-the-identification-list">Cleaning the identification
-    list</a>
-    - <a href="#2-butenoic-acid-3-methyl-"
-      id="toc-2-butenoic-acid-3-methyl-">2-Butenoic acid, 3-methyl-</a>
-    - <a href="#benzoic-acid-ethyl-ester"
-      id="toc-benzoic-acid-ethyl-ester">Benzoic acid, ethyl ester</a>
-    - <a href="#benzoic-acid" id="toc-benzoic-acid">Benzoic acid</a>
-    - <a href="#e-26-dimethylocta-37-diene-26-diol"
-      id="toc-e-26-dimethylocta-37-diene-26-diol">(E)-2,6-Dimethylocta-3,7-diene-2,6-diol</a>
-    - <a href="#catechol" id="toc-catechol">Catechol</a>
-    - <a href="#benzofuran-23-dihydro-"
-      id="toc-benzofuran-23-dihydro-">Benzofuran, 2,3-dihydro-</a>
-    - <a href="#phenol-o-amino-" id="toc-phenol-o-amino-">Phenol, o-amino-</a>
-    - <a href="#1h-pyrrole-25-dione-3-ethyl-4-methyl-"
-      id="toc-1h-pyrrole-25-dione-3-ethyl-4-methyl-">1H-Pyrrole-2,5-dione,
-      3-ethyl-4-methyl-</a>
 
 # Introduction
 
-Metabolomics has been driven by mass spectrometry technologies such as
-gas chromatography coupled to mass spectrometry (GC-MS), allowing it to
-take an important role in recent years. However, it has been facing
-challenges in the identification and quantification of metabolites due
-to the coelution of complex samples and fragmentation of ions,
-nevertheless, techniques have been developed that allow the analysis of
-GC-MS data such as “peak-picking” and multivariate
-deconvolution.(Domingo-Almenara et al., 2016) Tools such as MZmine,
-MetAlign and XCMS are used for data processing, but their focus on m/z
-values and fragmented peak areas makes accurate compound identification
-difficult. On the other hand, TNO-DECO and ADAP-GC focus on
-quantification and identification of metabolites from raw
-data.(Domingo-Almenara et al., 2016) Therefore, based on the limitations
-and parameters to be followed, software has been developed that allows a
-comprehensive and accurate analysis of the data. These include eRah, a
-free and open source software designed to process data in untargeted
-GC-MS-based metabolomics. This R package is based on central
-deconvolution, focusing on blind source separation (BSS), quantification
-and automated identification of sample spectra by comparison with
-spectral libraries.(Domingo-Almenara et al., 2016)
+The present document aims to record the GC-EI (Q)MS spectral
+deconvolution procedure of the *Ilex guayusa* volatile profile. A brief
+explanation, the code, and graphics are included for each step.
+
+The workflow used is taken from the paper [eRah: A Computational Tool
+Integrating Spectral Deconvolution and Alignment with Quantification and
+Identification of Metabolites in GC/MS-Based
+Metabolomics](https://doi.org/10.1021/acs.analchem.6b02927). It offers a
+wide variety of functions to automatically detect and deconvolve the
+spectra of the compounds appearing in GC–MS chromatograms.
 
 # Before to start
 
-eRah is a free R package which incorporates a central deconvolution
-method, so it uses multivariate techniques based on blind source
-separation (BSS) which is a process that allows the alignment,
-quantification and identification of metabolites through the comparison
-of spectral libraries, which in turn, allows obtaining a table with the
-names of the compounds, the matching scores and the integrated area of
-the compound for each sample. The table shows the compound names,
-coincidence scores and the integrated area of the compound for each
-sample.
+The “eRah” package accepts raw data files (netCDF or mzXML) obtained in
+GC–q/MS, GC-TOF/MS, and GC-qTOF/MS (using nominal mass) equipment.
+
+In this case, the data was obtained with a GC-2030 gas chromatograph
+coupled to a GCMS-QP2020 NX quadrupole mass spectrometer operating in
+electron ionization (GC-EI-q/MS). The raw MS data (.qgd) were converted
+to (netCDF) format using the proprietary software of the instrument GCMS
+Postrun Analysis 4.53SP1. The data was organized in an experiment folder
+named Data_to_eRah. This contains three class-folders called
+’Process_Blank’, ’Quality_Control’, and ’Samples’, each containing the
+sample files for that class.
 
 # eRah package workflow
 
-The eRah package is installed and loaded, using “lirary (erah)”.
+The eRah package is installed and loaded.
 
 ``` r
 # eRah package installation
 #install.packages('erah')
-# eRah library call
+# eRah library loading
 library(erah)
 ```
 
-Delete unwanted files in a specific directory and create a directory
-with the desired files.
+Delete unwanted files in the experiment folder and create the
+instrumental and phenotype files.
 
 ``` r
 # Delete all file that are not in folders
@@ -87,17 +62,22 @@ unlink('Data/Data_to_eRah/*')
 createdt('Data/Data_to_eRah/')
 ```
 
-Data from two CSV files is loaded and processed, creating an experiment
-object containing this data, tagged with relevant information for the
-study of the volatilloma of I. guayusa.
+The previously created files (instrumental and phenotype) were loaded in
+R. Then, the MetaboSet object was created to store the sample metadata
+and processing results.
+
+**NOTE.** The instrumental and phenotype files created by eRah were
+relocated to a new directory. In both files, the semicolon delimiter has
+been changed to a comma delimiter. The complete directory path of the
+chromatograms has been added to the instrumental file.
 
 ``` r
-# Loading (*.mzXML) chromatograms
+# Loading (*.mzXML) chromatograms mane (instrumental file)
 #instrumental <- read.csv('Data/Metadata_to_eRah/Metadata_inst_mzXML.csv')
 # If (*.mzXML) did not work
 # Loading (*.CDF) chromatograms
 instrumental <- read.csv('Data/Metadata_to_eRah/Metadata_inst_CDF.csv')
-# Loading metadata of the chromatograms
+# Loading metadata of the chromatograms (phenotype file)
 phenotype <- read.csv('Data/Metadata_to_eRah/Metadata_pheno.csv')
 # Merge of metadata information with chromatograms
 raw_data <- newExp(instrumental = instrumental,
@@ -105,12 +85,12 @@ raw_data <- newExp(instrumental = instrumental,
                    info = 'I. guayusa volatilome')
 ```
 
-Parameters for composite deconvolution are specified, defining specific
-criteria on peak width and minimum height, noise threshold, and
-excluding certain ranges of m/z values from processing to improve the
-accuracy and relevance of chemical analysis.
-
 ## Compound Deconvolution
+
+To improve the accuracy and relevance of chemical analysis, parameters
+for composite deconvolution are specified, specific criteria on peak
+width, minimum height, and noise threshold are defined, and certain
+ranges of m/z values are excluded from processing.
 
 ``` r
 dec_par <- setDecPar(min.peak.width = 0.7,
@@ -120,7 +100,7 @@ dec_par <- setDecPar(min.peak.width = 0.7,
                      analysis.time = c(3.1,50))
 ```
 
-To carry out a process in parallel we use the “future” package, which
+To carry out a process in parallel, we use the “future” package, which
 allows us to execute tasks in parallel, improving efficiency and
 processing speed simultaneously.
 
@@ -129,9 +109,9 @@ plan(future::multisession,
      workers = 14)
 ```
 
-We proceed to the deconvolution of compounds in the experimental data
-(raw_data) using the parameters specified in “dec_par” the results
-obtained will be saved in (dec_par).
+We proceed to the deconvolution of compounds using the parameters
+specified in “dec_par”. The results obtained will be saved in
+(dec_data).
 
 ``` r
 dec_data <- deconvolveComp(raw_data,
@@ -449,7 +429,7 @@ Parameters are defined for alignment and applied to the data.
 
 ``` r
 # Alignment parameters
-alig_par <- setAlPar(min.spectra.cor = 0.9,
+alig_par <- setAlPar(min.spectra.cor = 0.70,
                      max.time.dist = 5,
                      mz.range = 50:500)
 # Alignment
@@ -459,11 +439,9 @@ peak_alig <- alignComp(dec_data,
 
 ## Missing Compound Recovery
 
-By means of the “recMissComp” function it is used to recover missing
-compounds in spectral data, which allows the general model to be
-adjusted to the compounds present in a minimum number of samples and can
-consider the spectra of samples where the compound is missing to obtain
-the final average spectrum.
+This step is used to recover missing compounds in the samples, the
+parameter only requires the number of minimum values for which a
+compound wants to be ’re-searched’ in the samples.
 
 ``` r
 peak_find <- recMissComp(peak_alig,
@@ -474,19 +452,30 @@ peak_find <- recMissComp(peak_alig,
     ##  Updating alignment table... 
     ## Model fitted!
 
-# Identification
+Exporting alignment feature list for blank subtraction with
+[“notame”](https://doi.org/10.3390/metabo10040135) R package. The
+procedures used are available in the “Multivariate_Statistics” notebook
+of GitHub repository
+(<https://github.com/IKIAM-NPLab/I_guayusa_volatilome>). Only
+high-quality features were used for metabolite identification.
 
 ``` r
-# Loading NIST 20 (*.msp) library
-#nist.database <- importMSP(filename = "E:/NIST_20_Library/Result/NIST20EI_2eRah.MSP",
-#                           DB.name = "NIST",
-#                           DB.version = "NIST20",
-#                           DB.info = "NIST MS Search Export")
-# Save library for a posterior faster loading
-#save(nist.database, file= "E:/NIST_20_Library/Result/NIST20EI_2eRah.rda")
-# Load R library
-load("E:/NIST_20_Library/Result/NIST20EI_2eRah.rda")
-mslib <- nist.database
+# Extracting alignment feature list
+feat_list <- alignList(peak_find,
+                       by.area = FALSE)
+# Exporting alignment feature list
+write.csv(feat_list,
+          file = "Result/eRah_Result/erah_Export_2Notame.csv")
+```
+
+# Identification
+
+Metabolite identification was by comparing all the spectra found against
+a reference database. The eRah default database was used to metabolite
+identification. Metabolite identification was improve by exporting all
+the spectra found (.msp) in eRah to NIST MS Search 2.4 software.
+
+``` r
 # Identification
 peak_iden <- identifyComp(peak_find,
                           id.database = mslib,
@@ -498,15 +487,8 @@ peak_iden <- identifyComp(peak_find,
     ## Comparing spectra... 
     ## Done!
 
-``` r
-# Identified compounds list
-id_list <- idList(peak_iden)
-# Exporting identified compounds list
-write.csv(id_list,
-          file = "Result/eRah_Result/NIST_Identification.csv")
-```
-
-Exporting spectra to NIST identification.
+Exporting spectra to NIST MS Search software identification with NIST-20
+library.
 
 ``` r
 export2MSP(peak_iden,
@@ -515,314 +497,3 @@ export2MSP(peak_iden,
 ```
 
     ## Spectra saved at: Result/eRah_Result/ExportMSP
-
-Exporting feature list to statistical analysis.
-
-``` r
-# Extracting alignment feature list
-feat_list <- alignList(peak_iden,
-                       by.area = FALSE)
-# Exporting alignment feature list
-write.csv(feat_list,
-          file = "Result/eRah_Result/erah_Export_2Notame.csv")
-```
-
-## Cleaning the identification list
-
-How many metabolites were identified? How we are clean the identified
-compound list?
-
-Installation of R package to calculate linear retention index (RI).
-
-``` r
-# Installation of "MetaboCoreUtils" package
-#install.packages("remotes")
-#remotes::install_github("rformassspectrometry/MetaboCoreUtils")
-
-# Loading "MetaboCoreUtils" library
-library("MetaboCoreUtils")
-```
-
-Explain how retention time of n-alkanes was extract?
-
-Read of retention time list of n-alkanes
-
-``` r
-# Loadding rt of each n-alkane
-rti <- data.frame(rtime = c(7.557, 10.006, 12.569, 15.111, 17.581, 19.937,
-                            22.190, 24.338, 26.399, 28.813, 32.000, 36.327,
-                            39.949, 42.506, 44.557, 46.309, 47.852, 49.257,
-                            50.554, 51.781, 52.936, 54.182, 55.604),
-                  rindex = c(1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800,
-                             1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600,
-                             2700, 2800, 2900, 3000, 3100, 3200, 3300))
-```
-
-### 2-Butenoic acid, 3-methyl-
-
-Mirror plot of alignID number 7
-
-``` r
-plotSpectra(peak_iden, 7,
-            draw.color = "red",
-            comp.db = 315647,
-            xlim = c(50,130))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
-
-``` r
-# Experimental RI = 958 (Calculated by GCMSsolution software)
-# Literature RI = 947 (NIST#: 1105)
-# ΔRI = 11
-```
-
-### Benzoic acid, ethyl ester
-
-Mirror plot of alignID number 123
-
-``` r
-plotSpectra(peak_iden, 123,
-            draw.color = "red",
-            comp.db = 316698,
-            xlim = c(50,160))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(9.0501, rti)
-```
-
-    ## [1] 1160.968
-
-``` r
-# Literature RI = 1172 (NIST#: 150033)
-# ΔRI = 11
-```
-
-### Benzoic acid
-
-Mirror plot of alignID number 124
-
-``` r
-plotSpectra(peak_iden, 124,
-            draw.color = "red",
-            comp.db = 236,
-            xlim = c(50,160))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(9.049, rti)
-```
-
-    ## [1] 1160.923
-
-``` r
-# Literature RI = 1171 (NIST#: 290514)
-# ΔRI = 10
-```
-
-### (E)-2,6-Dimethylocta-3,7-diene-2,6-diol
-
-Mirror plot of alignID number 133
-
-``` r
-plotSpectra(peak_iden, 133,
-            draw.color = "red",
-            comp.db = 265239,
-            xlim = c(50,140))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(9.7654, rti)
-```
-
-    ## [1] 1190.176
-
-``` r
-# Literature RI = 1191 (NIST#: 412424)
-# ΔRI = 1
-```
-
-(E)-2,6-Dimethylocta-3,7-diene-2,6-diol
-
-Mirror plot of alignID number 134
-
-``` r
-plotSpectra(peak_iden, 134,
-            draw.color = "red",
-            comp.db = 265239,
-            xlim = c(50,140))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(9.7659, rti)
-```
-
-    ## [1] 1190.196
-
-``` r
-# Literature RI = 1191 (NIST#: 412424)
-# ΔRI = 1
-```
-
-### Catechol
-
-Mirror plot of alignID number 140
-
-``` r
-plotSpectra(peak_iden, 140,
-            draw.color = "red",
-            comp.db = 8672,
-            xlim = c(50,130))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(9.9673, rti)
-```
-
-    ## [1] 1198.42
-
-``` r
-# Literature RI = 1209 (NIST#: 227771)
-# ΔRI = 11
-```
-
-Catechol
-
-Mirror plot of alignID number 141
-
-``` r
-plotSpectra(peak_iden, 141,
-            draw.color = "red",
-            comp.db = 8672,
-            xlim = c(50,130))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(9.9682, rti)
-```
-
-    ## [1] 1198.457
-
-``` r
-# Literature RI = 1209 (NIST#: 227771)
-# ΔRI = 11
-```
-
-### Benzofuran, 2,3-dihydro-
-
-Mirror plot of alignID number 152
-
-``` r
-plotSpectra(peak_iden, 152,
-            draw.color = "red",
-            comp.db = 27705,
-            xlim = c(50,160))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(10.4657, rti)
-```
-
-    ## [1] 1217.936
-
-``` r
-# Literature RI = 1224 (NIST#: 477791)
-# ΔRI = 6
-```
-
-Benzofuran, 2,3-dihydro-
-
-Mirror plot of alignID number 154
-
-``` r
-plotSpectra(peak_iden, 154,
-            draw.color = "red",
-            comp.db = 27705,
-            xlim = c(50,160))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(10.4718, rti)
-```
-
-    ## [1] 1218.174
-
-``` r
-# Literature RI = 1224 (NIST#: 477791)
-# ΔRI = 6
-```
-
-### Phenol, o-amino-
-
-Mirror plot of alignID number 156
-
-``` r
-plotSpectra(peak_iden, 156,
-            draw.color = "red",
-            comp.db = 318455,
-            xlim = c(50,160))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(10.3802, rti)
-```
-
-    ## [1] 1214.6
-
-``` r
-# Literature RI = 1215 (NIST#: 290667)
-# ΔRI = 0
-```
-
-### 1H-Pyrrole-2,5-dione, 3-ethyl-4-methyl-
-
-Mirror plot of alignID number 178
-
-``` r
-plotSpectra(peak_iden, 178,
-            draw.color = "red",
-            comp.db = 61858,
-            xlim = c(50,250))
-```
-
-![](Spectral_Deconvolution_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
-
-``` r
-# Experimental Retention Index (RI)
-indexRtime(10.8242, rti)
-```
-
-    ## [1] 1231.924
-
-``` r
-# Literature RI = 1239 (NIST#: 412808)
-# ΔRI = 7
-```
