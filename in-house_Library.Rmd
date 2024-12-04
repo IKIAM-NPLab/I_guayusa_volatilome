@@ -1,0 +1,149 @@
+---
+title: "*in-house* GC-MS library"
+author: "Jefferson Pastuna"
+date: "2024-12-02"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+usethis::git_vaccinate()
+
+```
+
+# Introduction
+
+The document aims to record the spectral Library assembly of authentic compounds analyzed in the GC-EI (Q)MS. A brief explanation and graphics are included for each step.
+
+# Standard preparation
+
+All standards (**Table 1**) were accurately weight and diluted in the mass spectrometry-grade methanol. Working solutions of authentic compounds were prepared by dilution of the stock solutions (**Table 1**) with methanol to the final concentration of 1 µg/mL, 5 µg/mL, and 8 µg/mL.
+
+**Table 1.** Authentic compounds description and weight.
+
+|Name                  |Vendor        |Weight ± STD (mg)|
+|----------------------|--------------|-----------------|
+|Theobromine           |Sigma-Aldrich |1.3 ± 0.3        |
+|Theophylline          |Sigma-Aldrich |1.3 ± 0.1        |
+|Caffeine              |Sigma-Aldrich |3.9 ± 0.4        |
+|Atropine              |Sigma-Aldrich |2.0 ± 0.1        |
+|Harmaline             |Sigma-Aldrich |2.8 ± 0.1        |
+|Linalool              |Sigma-Aldrich |36.5 ± 0.1       |
+|trans-Cinnamaldehyde  |Sigma-Aldrich |32.2 ± 0.2       |
+|Methyl cinnamate      |Sigma-Aldrich |4.54 ± 0.2       |
+|Methyl tetracosanoate |Sigma-Aldrich |4.14 ± 0.3       |
+|Nicotinic acid        |Sigma-Aldrich |1.99 ± 0.1       |
+|Resorcinol            |Sigma-Aldrich |4.0 ± 0.1        |
+|Coumarin              |Sigma-Aldrich |3.2 ± 0.1        |
+|Anthraquinone         |Sigma-Aldrich |1.2 ± 0.1        |
+|Eugenol               |Sigma-Aldrich |27.1 ± 0.1       |
+|n-Alkanes (C7-C33)    |Restek        |na*              |
+
+>Were STD, standard desviation (n ≥ 3), *, 100 uL of n-Alkanes were added to 900 μL of n-Hexane.
+
+# GC-MS instrument
+
+**Column** Rtx-5 GC capillary column, 30 m, 0.25 mm ID, 0.25 µm (cat.# 10223)
+
+**Injection**
+
+Inj. Vol.: 1 µL splitless
+
+Inj. Temp.: 270 °C
+
+**Oven**
+
+Oven Temp.: 70 °C to 200 °C (hold 10 min) at 5 °C/min to 300 °C (hold 15 min) at 6 °C/min
+
+**Carrier Gas** He, constant flow
+
+Flow Rate:	1 mL/min
+
+**Detector** MS
+
+Mode:	Scan
+
+Transfer Line Temp.: 280 °C
+
+Analyzer Type:	Quadrupole
+
+Source Temp.:	230 °C
+
+Ionization Mode:	EI
+
+Scan Range (amu): 50-500
+
+**Instrument** Shimadzu GC-2030 & GCMS-QP2020 NX
+
+# Compound deconvolution
+
+The raw MS data [(.qgd)](Data/in-house_Library/qgd_raw_Files) were converted to [(.abf)](Data/in-house_Library/abf_raw_Files) format using Reifycs file converter. [MS-DIAL 4.9.221218](https://doi.org/10.1038/nmeth.3393) was used to deconvolute the raw spectral data using a pipeline that included peak detection, alignment, filtering, and gap filling. Parameters used in MS-DIAL are available in [(.txt)](\Data\in-house_Library\MS-DIAL_Parameter) and [(.med2)](\Data\in-house_Library\MS-DIAL_Parameter) format.
+
+# Library assembly
+
+Parameters are defined for alignment and applied to the data.
+
+|Name                  |Formula           |RT ± STD (min)|RI ± STD|
+|----------------------|------------------|--------------|--------|
+|Theobromine           |C~7~H~8~N~4~O~2~  |25.500 ± 0.044|1877 ± 3|
+|Theophylline          |C~7~H~8~N~4~O~2~  |28.193 ± 0.042|1999 ± 2|
+|Caffeine              |C~8~H~10~N~4~O~2~ |25.112 ± 0.006|1858 ± 0|
+|Atropine              |C~17~H~23~NO~3~   |36.645 ± 0.013|2236 ± 0|
+|Harmaline             |C~13~H~14~N~2~O   |36.303 ± 0.016|2228 ± 0|
+|Linalool              |C~10~H~18~O       |7.308 ± 0.006 |1103 ± 0|
+|trans-Cinnamaldehyde  |C~9~H~8~O         |11.643 ± 0.003|1277 ± 0|
+|Methyl cinnamate      |C~10~H~10~O~2~    |14.485 ± 0.005|1390 ± 0|
+|Methyl tetracosanoate |C~25~H~50~O~2~    |47.878 ± 0.003|2735 ± 0|
+|Nicotinic acid        |C~6~H~5~NO~2~     |10.405 ± 0.000|1229 ± 0|
+|Resorcinol            |C~6~H~6~O~2~      |11.815 ± 0.010|1284 ± 0|
+|Coumarin              |C~9~H~6~O~2~      |15.908 ± 0.003|1447 ± 0|
+|Anthraquinone         |C~14~H~8~O~2~     |27.798 ± 0.006|1982 ± 1|
+|Eugenol               |C~10~H~12~O~2~    |13.833 ± 0.003|1364 ± 0|
+|Nonane                |C~9~H~20~         |3.469 ± 0.004 |900 ± 0 |
+|Decane                |C~10~H~22~        |5.098 ± 0.004 |1000 ± 0|
+|Undecane              |C~11~H~24~        |7.232 ± 0.005 |1100 ± 0|
+|Dodecane              |C~12~H~26~        |9.677 ± 0.005 |1200 ± 0|
+|Tridecane             |C~13~H~28~        |12.224 ± 0.008|1300 ± 0|
+|Tetradecane           |C~14~H~30~        |14.752 ± 0.005|1400 ± 0|
+|Pentadecane           |C~15~H~32~        |17.209 ± 0.006|1500 ± 0|
+|Hexadecane            |C~16~H~34~        |19.550 ± 0.006|1600 ± 0|
+|Heptadecane           |C~17~H~36~        |21.791 ± 0.006|1700 ± 0|
+|Octadecane            |C~18~H~38~        |23.927 ± 0.005|1800 ± 0|
+|Nonadecane            |C~19~H~40~        |25.966 ± 0.006|1900 ± 0|
+|Eicosane              |C~20~H~42~        |28.220 ± 0.008|2000 ± 0|
+|Heneicosane           |C~21~H~44~        |31.173 ± 0.008|2100 ± 0|
+|Docosane              |C~22~H~46~        |35.188 ± 0.015|2200 ± 1|
+|Tricosane             |C~23~H~48~        |39.210 ± 0.011|2300 ± 0|
+|Tetracosane           |C~24~H~50~        |41.914 ± 0.008|2400 ± 0|
+|Pentacosane           |C~25~H~52~        |44.032 ± 0.008|2500 ± 1|
+|Hexacosane            |C~26~H~54~        |45.816 ± 0.006|2600 ± 0|
+|Heptacosane           |C~27~H~56~        |47.384 ± 0.006|2700 ± 1|
+|Octacosane            |C~28~H~58~        |48.801 ± 0.006|2800 ± 1|
+|Nonacosane            |C~29~H~60~        |50.102 ± 0.007|2900 ± 1|
+|Triacontane           |C~30~H~62~        |51.328 ± 0.006|3000 ± 1|
+|Hentriacontane        |C~31~H~64~        |52.479 ± 0.005|3100 ± 1|
+|Dotriacontane         |C~32~H~66~        |53.638 ± 0.006|3200 ± 1|
+|Tritriacontane        |C~33~H~68~        |54.952 ± 0.009|3299 ± 1|
+
+>Were RT, retention time in minutes, RI, Semi-standard non-polar Van den Dool and Kratz linear retention index, STD, standard desviation (n ≥ 3).
+
+
+## Library to MS-DIAL
+
+This step is used to recover missing compounds in the samples, the parameter only requires the number of minimum values for which a compound wants to be ’re-searched’ in the samples.
+
+
+Exporting alignment feature list for blank subtraction with ["notame"](https://doi.org/10.3390/metabo10040135) R package. The procedures used are available in the "Multivariate_Statistics" notebook of GitHub repository (https://github.com/IKIAM-NPLab/I_guayusa_volatilome). Only high-quality features were used for metabolite identification.
+
+
+## Library to NIST MS Search
+
+Metabolite identification was by comparing all the spectra found against a reference database. The eRah default database was used to metabolite identification. Metabolite identification was improve by exporting all the spectra found (.msp) in eRah to NIST MS Search 2.4 software.
+
+Exporting spectra to NIST MS Search software identification with NIST-20 library.
+
+

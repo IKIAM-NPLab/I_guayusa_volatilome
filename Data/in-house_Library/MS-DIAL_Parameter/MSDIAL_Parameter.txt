@@ -1,0 +1,68 @@
+MS-DIAL ver. 4.9.221218
+
+#Data type
+Data type	Centroid
+Ion mode	Positive
+Accuracy type	IsNominal
+#Data collection parameters
+Retention time begin	3.1
+Retention time end	30
+Mass range begin	50
+Mass range end	500
+
+#Data processing
+Number of threads	1
+
+#Peak detection parameters
+Smoothing method	LinearWeightedMovingAverage
+Smoothing level	3
+Average peak width	5
+Minimum peak height	500
+Mass slice width	0.5
+Mass accuracy	0.5
+
+#MS1Dec parameters
+Sigma window value	0.5
+Amplitude cut off	70
+
+#identification
+MSP file	E:\NIST_20_Library\Result\NIST20EI_2MSDIAL.msp
+RI index file	see last
+Retention type	RI
+RI compound	Alkanes
+Retention time tolerance	100
+Retention index tolerance	1000
+EI similarity library tolerance	70
+Identification score cut off	70
+Use retention information for scoring	False
+Use retention information for filtering	False
+Use quant masses defined in MSP format file	False
+
+#Alignment parameters setting
+Reference file	E:\GC-MS_Standards\MS-DIAL_Project\Batch_20112024\Methyl_cinnamate\65_Methyl_cinnamate_1ppm.abf
+Retention time	RT
+Retention index tolerance	20
+Retention time tolerance	0.075
+EI similarity tolerance	80
+Retention time factor	0.5
+EI similarity factor	0.5
+Identification after alignment	False
+Gap filling by compulsion	True
+Basepeak mz selected as the representative quant mass	False
+
+#Filtering setting
+Peak count filter	0
+N% detected in at least one group	0
+Remove feature based on peak height fold-change	True
+Sample max / blank average	5
+Sample average / blank average	5
+Keep identified and annotated metabolites	False
+Keep removable features and assign the tag for checking	False
+
+#RI dictionary (analysis file path / ri dictionary file path)
+Rfx.Riken.OsakaUniv.AnalysisFileBean	E:\GC-MS_Standards\MS-DIAL_Project\Batch_20112024\39_n-Alkanes_2MSDIAL.txt
+Rfx.Riken.OsakaUniv.AnalysisFileBean	E:\GC-MS_Standards\MS-DIAL_Project\Batch_20112024\39_n-Alkanes_2MSDIAL.txt
+Rfx.Riken.OsakaUniv.AnalysisFileBean	E:\GC-MS_Standards\MS-DIAL_Project\Batch_20112024\56_n-Alkanes_2MSDIAL.txt
+Rfx.Riken.OsakaUniv.AnalysisFileBean	E:\GC-MS_Standards\MS-DIAL_Project\Batch_20112024\64_n-Alkanes_2MSDIAL.txt
+Rfx.Riken.OsakaUniv.AnalysisFileBean	E:\GC-MS_Standards\MS-DIAL_Project\Batch_20112024\74_n-Alkanes_2MSDIAL.txt
+
