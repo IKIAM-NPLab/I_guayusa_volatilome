@@ -98,8 +98,8 @@ Reifycs file converter. [MS-DIAL
 4.9.221218](https://doi.org/10.1038/nmeth.3393) was used to deconvolute
 the raw spectral data using a pipeline that included peak detection,
 alignment, filtering, and gap filling. Parameters used in MS-DIAL are
-available in [(.txt)](\Data\in-house_Library\MS-DIAL_Parameter) and
-[(.med2)](\Data\in-house_Library\MS-DIAL_Parameter) format.
+available in [(.txt)](Data/in-house_Library/MS-DIAL_Parameter) and
+[(.med2)](Data/in-house_Library/MS-DIAL_Parameter) format.
 
 # Library assembly
 
