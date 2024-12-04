@@ -81,7 +81,7 @@ Scan Range (amu): 50-500
 
 # Compound deconvolution
 
-The raw MS data [(.qgd)](Data/in-house_Library/qgd_raw_Files) were converted to [(.abf)](Data/in-house_Library/abf_raw_Files) format using Reifycs file converter. [MS-DIAL 4.9.221218](https://doi.org/10.1038/nmeth.3393) was used to deconvolute the raw spectral data using a pipeline that included peak detection, alignment, filtering, and gap filling. Parameters used in MS-DIAL are available in [(.txt)](Data\in-house_Library\MS-DIAL_Parameter) and [(.med2)](Data\in-house_Library\MS-DIAL_Parameter) format.
+The raw MS data [(.qgd)](Data/in-house_Library/qgd_raw_Files) were converted to [(.abf)](Data/in-house_Library/abf_raw_Files) format using Reifycs file converter. [MS-DIAL 4.9.221218](https://doi.org/10.1038/nmeth.3393) was used to deconvolute the raw spectral data using a pipeline that included peak detection, alignment, filtering, and gap filling. Parameters used in MS-DIAL are available in [(.txt)](Data/in-house_Library/MS-DIAL_Parameter) and [(.med2)](Data/in-house_Library/MS-DIAL_Parameter) format.
 
 # Library assembly
 
