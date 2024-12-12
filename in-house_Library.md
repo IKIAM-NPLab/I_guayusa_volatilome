@@ -103,10 +103,17 @@ available in [(.txt)](Data/in-house_Library/MS-DIAL_Parameter) and
 
 # Library assembly
 
-Each deconvoluted compounds was exported to MS-FINDER ver. 3.60 as see
-in below imagen.
+All deconvoluted compounds (**Table 2**) was exported to MS-FINDER ver.
+3.60 as see in the figure.
 
-**Table 1.** Authentic compounds RT and RI analized in GC-MS.
+![](Data/in-house_Library/ScreenCapture/MSFINDER_Export.jpg)
+
+MS-FINDER healp us easy metadata editio of each compuends, as seen in
+the figure.
+
+![](Data/in-house_Library/ScreenCapture/MSFINDER_Edition.jpg)
+
+**Table 2.** Authentic compounds RT and RI analized in GC-MS.
 
 | Name                  | Formula                                               | RT ± STD (min) | RI ± STD |
 |-----------------------|-------------------------------------------------------|----------------|----------|
@@ -156,16 +163,14 @@ in below imagen.
 
 ## Library to MS-DIAL
 
-This step is used to recover missing compounds in the samples, the
-parameter only requires the number of minimum values for which a
-compound wants to be ’re-searched’ in the samples.
+Finally, using the text editor, the exported (.MSP) was edited acording
+to MS-DIAL keys names of the compunds metadata, as seen in the figure.
+Afther that, the (.MSP) library is ready to use in MS-FINDER.
 
-Exporting alignment feature list for blank subtraction with
-[“notame”](https://doi.org/10.3390/metabo10040135) R package. The
-procedures used are available in the “Multivariate_Statistics” notebook
-of GitHub repository
-(<https://github.com/IKIAM-NPLab/I_guayusa_volatilome>). Only
-high-quality features were used for metabolite identification.
+![](Data/in-house_Library/ScreenCapture/MSFINDER_msp_files.jpg)
+
+The final library could be download from:
+[GC-MS_Standard_Library_2MSDIAL.msp](Result/in-house_Library_Result/GC-MS_Standard_Library_2MSDIAL.msp)
 
 ## Library to NIST MS Search
 
