@@ -174,10 +174,21 @@ The final library could be download from:
 
 ## Library to NIST MS Search
 
-Metabolite identification was by comparing all the spectra found against
-a reference database. The eRah default database was used to metabolite
-identification. Metabolite identification was improve by exporting all
-the spectra found (.msp) in eRah to NIST MS Search 2.4 software.
+The last (.msp) library was load in the NIST MS Search 2.4 software as
+showed in the figure.
 
-Exporting spectra to NIST MS Search software identification with NIST-20
-library.
+![](Data/in-house_Library/ScreenCapture/NIST_Data_Load.jpg)
+
+Compund by compound were added to a user NIST library.
+
+![](Data/in-house_Library/ScreenCapture/NIST_add_compund.jpg)
+
+When all compound were added, the created library are available in the
+NIST library option. That library could be used for level 1 metabolite
+identification.
+
+![](Data/in-house_Library/ScreenCapture/User_NIST_Library.jpg)
+
+The final library to use in NIST MS Search software could be download
+from:
+[IKIAM_NPL_GCMS_Lib](Result/in-house_Library_Result/IKIAM_NPL_GCMS_Lib.zip)
