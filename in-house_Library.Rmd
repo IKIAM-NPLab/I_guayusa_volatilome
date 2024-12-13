@@ -1,5 +1,5 @@
 ---
-title: "*in-house* GC-MS library"
+title: "in-house GC-MS library"
 author: "Jefferson Pastuna"
 date: "2024-12-02"
 output:

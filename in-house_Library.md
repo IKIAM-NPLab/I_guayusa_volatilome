@@ -1,4 +1,4 @@
-*in-house* GC-MS library
+in-house GC-MS library
 ================
 Jefferson Pastuna
 2024-12-02
