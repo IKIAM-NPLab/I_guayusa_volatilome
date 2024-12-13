@@ -101,10 +101,10 @@ Reifycs file converter. MS-DIAL 4.9.221218 was used to deconvolute the
 raw spectral data using a pipeline that included peak detection,
 alignment, filtering, and gap filling. Parameters used in MS-DIAL are
 available in (.txt) file
-([link](Data/in-house_Library/MS-DIAL_Parameter)) and (.med2) file
-([link](Data/in-house_Library/MS-DIAL_Parameter)) (direct load in
-MS-DIAL). Deconvoluted compound retention time (RT) and retention index
-(RI) are shown in **Table 2**.
+([link](Data/in-house_Library/MS-DIAL_Parameter/MSDIAL_Parameter.txt))
+and (.med2) file ([link](Data/in-house_Library/MS-DIAL_Parameter))
+(direct load in MS-DIAL). Deconvoluted compound retention time (RT) and
+retention index (RI) are shown in **Table 2**.
 
 **Table 2.** RT and RI of the authentic compounds analyzed in GC-MS.
 
@@ -162,7 +162,7 @@ available in (.txt) format to direct load in MS-DIAL,
 [link](Data/in-house_Library/abf_raw_Files/Batch_05112024) of batch
 05/11/2024, and
 [link](Data/in-house_Library/abf_raw_Files/Batch_20112024) of batch
-20112024) and reported as the average of three runs (one run for each
+20/11/2024) and reported as the average of three runs (one run for each
 concentration: 1 ppm, five ppm, and eight ppm).
 
 # Library assembly
