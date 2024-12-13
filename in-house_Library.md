@@ -21,7 +21,7 @@ Jefferson Pastuna
 
 The document aims to record the spectral library assembly of authentic
 compounds analyzed in the Gas Chromatography Coupled to Electron
-Ionization Quadrupole Mass Spectrometry (GC-EI (Q)MS). A brief
+Ionization (quadrupole) Mass Spectrometry (GC-EI (q)MS). A brief
 explanation and graphics are included for each step.
 
 # Standards preparation
@@ -100,10 +100,11 @@ The raw MS data (.qgd) (available in
 Reifycs file converter. MS-DIAL 4.9.221218 was used to deconvolute the
 raw spectral data using a pipeline that included peak detection,
 alignment, filtering, and gap filling. Parameters used in MS-DIAL are
-available in (.txt) ([link](Data/in-house_Library/MS-DIAL_Parameter))
-and (.med2) ([link](Data/in-house_Library/MS-DIAL_Parameter)).
-Deconvoluted compound retention time and retention index are shown in
-**Table 2**.
+available in (.txt) file
+([link](Data/in-house_Library/MS-DIAL_Parameter)) and (.med2) file
+([link](Data/in-house_Library/MS-DIAL_Parameter)) (direct load in
+MS-DIAL). Deconvoluted compound retention time (RT) and retention index
+(RI) are shown in **Table 2**.
 
 **Table 2.** RT and RI of the authentic compounds analyzed in GC-MS.
 
@@ -153,6 +154,17 @@ Deconvoluted compound retention time and retention index are shown in
 > Dool and Kratz linear retention index, STD, standard deviation (n ≥
 > 3).
 
+The RI of n-Alkanes was calculated using an R Script, with each
+chromatogram (6 analytical runs) as a reference for the rest (available
+in [link](RI_Calculation_Script.R)). The RI of the other compounds was
+automatically calculated by MS-DIAL (using the RT of n-Alkanes,
+available in (.txt) format to direct load in MS-DIAL,
+[link](Data/in-house_Library/abf_raw_Files/Batch_05112024) of batch
+05/11/2024, and
+[link](Data/in-house_Library/abf_raw_Files/Batch_20112024) of batch
+20112024) and reported as the average of three runs (one run for each
+concentration: 1 ppm, five ppm, and eight ppm).
+
 # Library assembly
 
 All deconvoluted compounds (**Table 2**) were exported to MS-FINDER ver.
@@ -161,39 +173,57 @@ All deconvoluted compounds (**Table 2**) were exported to MS-FINDER ver.
 ![](Data/in-house_Library/ScreenCapture/MSFINDER_Export.jpg) **Figure
 1.** Deconvoluted compound exportation from MS-DIAL to MS-FINDER.
 
-MS-FINDER healp us easy metadata editio of each compuends, as seen in
-the figure.
+MS-FINDER helps us quickly add metadata to each compound exported from
+MS-DIAL, as seen in **Figure 2**. After adding metadata of all
+compounds, we can export in (.msp) format to the posterior edition
+(**Figure 2**).
 
-![](Data/in-house_Library/ScreenCapture/MSFINDER_Edition.jpg)
+![](Data/in-house_Library/ScreenCapture/MSFINDER_Edition.jpg) **Figure
+2.** Use of MS-FINDER to add metadata to the compounds deconvoluted in
+MS-DIAL.
 
 ## Library to MS-DIAL
 
-Finally, using the text editor, the exported (.MSP) was edited acording
-to MS-DIAL keys names of the compunds metadata, as seen in the figure.
-Afther that, the (.MSP) library is ready to use in MS-FINDER.
+Finally, using the text editor, the exported (.msp) was edited according
+to MS-DIAL key names of the compounds metadata, as seen in **Figure 3**.
+After that, the (.msp) library is ready to use in MS-DIAL for compound
+identification.
 
-![](Data/in-house_Library/ScreenCapture/MSFINDER_msp_files.jpg)
+![](Data/in-house_Library/ScreenCapture/MSFINDER_msp_files.jpg) **Figure
+3.** Library edition according to MS-DIAL library.
 
-The final library could be download from:
-[GC-MS_Standard_Library_2MSDIAL.msp](Result/in-house_Library_Result/GC-MS_Standard_Library_2MSDIAL.msp)
+The final library can be downloaded at the following link:
+[IKIAM_NPL_GCMS_Lib_2MSDIAL.msp](Result/in-house_Library_Result/IKIAM_NPL_GCMS_Lib_2MSDIAL.msp)
 
 ## Library to NIST MS Search
 
-The last (.msp) library was load in the NIST MS Search 2.4 software as
-showed in the figure.
+The last edited library (.msp) was loaded in the NIST MS Search 2.4
+software, as seen in **Figure 4**.
 
-![](Data/in-house_Library/ScreenCapture/NIST_Data_Load.jpg)
+![](Data/in-house_Library/ScreenCapture/NIST_Data_Load.jpg) **Figure
+4.** Authentic compounds spectra data loading in NIST MS Search.
 
-Compund by compound were added to a user NIST library.
+In the “Librarian” window of NIST MS Search software, compound by
+compound was added to a user NIST library, as seen in **Figure 5**.
 
-![](Data/in-house_Library/ScreenCapture/NIST_add_compund.jpg)
+![](Data/in-house_Library/ScreenCapture/NIST_add_compund.jpg) **Figure
+5.** Registering of authentic compound spectra data in a user NIST
+library.
 
-When all compound were added, the created library are available in the
-NIST library option. That library could be used for level 1 metabolite
-identification.
+After all compounds were added to the user NIST library, the created
+library is available in the NIST “library Search Options” window
+(**Figure 6**). The library is ready to use for metabolite
+identification in the NIST MS Search software.
+
+<center>
 
 ![](Data/in-house_Library/ScreenCapture/User_NIST_Library.jpg)
 
-The final library to use in NIST MS Search software could be download
-from:
+</center>
+
+**Figure 6.** User library selection to compound identification in the
+NIST MS Search software.
+
+The library to use in the NIST MS Search software can be downloaded at
+the following link:
 [IKIAM_NPL_GCMS_Lib](Result/in-house_Library_Result/IKIAM_NPL_GCMS_Lib.zip)
