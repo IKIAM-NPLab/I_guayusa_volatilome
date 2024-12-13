@@ -17,11 +17,11 @@ usethis::git_vaccinate()
 
 # Introduction
 
-The document aims to record the spectral Library assembly of authentic compounds analyzed in the GC-EI (Q)MS. A brief explanation and graphics are included for each step.
+The document aims to record the spectral library assembly of authentic compounds analyzed in the Gas Chromatography Coupled to Electron Ionization Quadrupole Mass Spectrometry (GC-EI (Q)MS). A brief explanation and graphics are included for each step.
 
-# Standard preparation
+# Standards preparation
 
-All standards (**Table 1**) were accurately weight and diluted in the mass spectrometry-grade methanol. Working solutions of authentic compounds were prepared by dilution of the stock solutions (**Table 1**) with methanol to the final concentration of 1 µg/mL, 5 µg/mL, and 8 µg/mL.
+All standards were accurately weighed (**Table 1**) and diluted in mass spectrometry-grade methanol. Working solutions of authentic compounds were prepared by diluting the stock solutions (**Table 1**) with methanol to the final concentrations of 1 µg/mL, five µg/mL, and eight µg/mL.
 
 **Table 1.** Authentic compounds description and weight.
 
@@ -43,7 +43,7 @@ All standards (**Table 1**) were accurately weight and diluted in the mass spect
 |Eugenol               |Sigma-Aldrich |27.1 ± 0.1        |
 |n-Alkanes (C7-C33)    |Restek        |na                |
 
->Were STD, standard desviation (n = 10), na, 100 uL of n-Alkanes were added to 900 μL of n-Hexane, *, stock solutions was made by adding 1 mL of MeOH.
+>STD, standard deviation (n = 10), na, 100 uL of n-Alkanes were added to 900 μL of n-Hexane, *, stock solutions were made by adding 1 mL of MeOH.
 
 # GC-MS instrument
 
@@ -81,23 +81,9 @@ Scan Range (amu): 50-500
 
 # Compound deconvolution
 
-The raw MS data [(.qgd)](Data/in-house_Library/qgd_raw_Files) were converted to [(.abf)](Data/in-house_Library/abf_raw_Files) format using Reifycs file converter. MS-DIAL 4.9.221218 was used to deconvolute the raw spectral data using a pipeline that included peak detection, alignment, filtering, and gap filling. Parameters used in MS-DIAL are available in [(.txt)](Data/in-house_Library/MS-DIAL_Parameter) and [(.med2)](Data/in-house_Library/MS-DIAL_Parameter) format.
+The raw MS data (.qgd) (available in [link](Data/in-house_Library/qgd_raw_Files)) were converted to (.abf) (available in [link](Data/in-house_Library/abf_raw_Files)) format using Reifycs file converter. MS-DIAL 4.9.221218 was used to deconvolute the raw spectral data using a pipeline that included peak detection, alignment, filtering, and gap filling. Parameters used in MS-DIAL are available in (.txt) ([link](Data/in-house_Library/MS-DIAL_Parameter)) and (.med2) ([link](Data/in-house_Library/MS-DIAL_Parameter)). Deconvoluted compound retention time and retention index are shown in **Table 2**.
 
-# Library assembly
-
-All deconvoluted compounds (**Table 2**) was exported to MS-FINDER ver. 3.60 as see in the figure.
-
-![](Data/in-house_Library/ScreenCapture/MSFINDER_Export.jpg)
-
-MS-FINDER healp us easy metadata editio of each compuends, as seen in the figure.
-
-![](Data/in-house_Library/ScreenCapture/MSFINDER_Edition.jpg)
-
-
-
-
-
-**Table 2.** Authentic compounds RT and RI analized in GC-MS.
+**Table 2.** RT and RI of the authentic compounds analyzed in GC-MS.
 
 |Name                  |Formula           |RT ± STD (min)|RI ± STD|
 |----------------------|------------------|--------------|--------|
@@ -141,8 +127,18 @@ MS-FINDER healp us easy metadata editio of each compuends, as seen in the figure
 |Dotriacontane         |C~32~H~66~        |53.638 ± 0.006|3200 ± 1|
 |Tritriacontane        |C~33~H~68~        |54.952 ± 0.009|3299 ± 1|
 
->Were RT, retention time in minutes, RI, Semi-standard non-polar Van den Dool and Kratz linear retention index, STD, standard desviation (n ≥ 3).
+>RT, retention time in minutes, RI, Semi-standard non-polar Van den Dool and Kratz linear retention index, STD, standard deviation (n ≥ 3).
 
+# Library assembly
+
+All deconvoluted compounds (**Table 2**) were exported to MS-FINDER ver. 3.60, as seen in **Figure 1**.
+
+![](Data/in-house_Library/ScreenCapture/MSFINDER_Export.jpg)
+**Figure 1.** Deconvoluted compound exportation from MS-DIAL to MS-FINDER. 
+
+MS-FINDER healp us easy metadata editio of each compuends, as seen in the figure.
+
+![](Data/in-house_Library/ScreenCapture/MSFINDER_Edition.jpg)
 
 ## Library to MS-DIAL
 
