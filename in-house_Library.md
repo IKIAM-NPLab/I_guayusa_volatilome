@@ -154,9 +154,9 @@ retention index (RI) are shown in **Table 2**.
 > Dool and Kratz linear retention index, STD, standard deviation (n ≥
 > 3).
 
-The RI of n-Alkanes was calculated using an R Script, with each
-chromatogram (6 analytical runs) as a reference for the rest (available
-in [link](RI_Calculation_Script.R)). The RI of the other compounds was
+The RI of n-Alkanes was calculated using an R Script (available in
+[link](RI_Calculation_Script.R)), with each chromatogram (6 analytical
+runs) as a reference for the rest. The RI of the other compounds was
 automatically calculated by MS-DIAL (using the RT of n-Alkanes,
 available in (.txt) format to direct load in MS-DIAL,
 [link](Data/in-house_Library/abf_raw_Files/Batch_05112024) of batch

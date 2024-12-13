@@ -129,7 +129,7 @@ The raw MS data (.qgd) (available in [link](Data/in-house_Library/qgd_raw_Files)
 
 >RT, retention time in minutes, RI, Semi-standard non-polar Van den Dool and Kratz linear retention index, STD, standard deviation (n ≥ 3).
 
-The RI of n-Alkanes was calculated using an R Script, with each chromatogram (6 analytical runs) as a reference for the rest (available in [link](RI_Calculation_Script.R)). The RI of the other compounds was automatically calculated by MS-DIAL (using the RT of n-Alkanes, available in (.txt) format to direct load in MS-DIAL, [link](Data/in-house_Library/abf_raw_Files/Batch_05112024) of batch 05/11/2024,  and [link](Data/in-house_Library/abf_raw_Files/Batch_20112024) of batch 20/11/2024) and reported as the average of three runs (one run for each concentration: 1 ppm, five ppm, and eight ppm).
+The RI of n-Alkanes was calculated using an R Script (available in [link](RI_Calculation_Script.R)), with each chromatogram (6 analytical runs) as a reference for the rest. The RI of the other compounds was automatically calculated by MS-DIAL (using the RT of n-Alkanes, available in (.txt) format to direct load in MS-DIAL, [link](Data/in-house_Library/abf_raw_Files/Batch_05112024) of batch 05/11/2024,  and [link](Data/in-house_Library/abf_raw_Files/Batch_20112024) of batch 20/11/2024) and reported as the average of three runs (one run for each concentration: 1 ppm, five ppm, and eight ppm).
 
 # Library assembly
 
