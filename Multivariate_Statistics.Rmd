@@ -1,5 +1,5 @@
 ---
-title: "Title"
+title: "Effect of age and light on the volatile profile of *Ilex guayusa* leaves - Multivariate statistical analysis"
 author: "Jefferson Pastuña"
 date: "2024-04-17"
 output:
@@ -17,17 +17,21 @@ usethis::git_vaccinate()
 
 # Introduction
 
-Introduction...
+This R Script aims to record the procedure for analyzing the volatile profile of *Ilex guayusa* leaves under different age and light conditions. Each step has a brief explanation, as well as code and graphics.
+
+The workflow used was taken from ["notame": Workflow for Non-Targeted LC–MS Metabolic Profiling](https://doi.org/10.3390/metabo10040135), Which offers a wide variety of functions for perform metabolomic profile analysis.
 
 # Before to start
 
-Before to start...
+The "notame" package accepts as input a feature table that can be obtained through software such as MZmine, MS-DIAL, among others. In this case, the feature table was obtained with the help of MZmine. The (*.csv) file exported from MZmine was fixed to get the final feature table input according to the "notame" package format.
+
+Modifications to the raw (*.csv) file can be summarized by adding and renaming columns. The added columns “Column” and “Ion Mode” allow for the analysis of samples with different types of columns and different ionization modes, respectively. Also, the cells corresponding to mass and retention time must be renamed so the "notame" package can detect and process them.
 
 # Notame workflow
 
-As a first step...
+The “notame” package and other dependency packages were installed as a first step for the analysis.
 
-```{r echo=TRUE, message=FALSE}
+```{r echo=TRUE, message=TRUE}
 
 # Notame package installation
 #if (!requireNamespace("devtools", quietly = TRUE)) {
@@ -43,7 +47,7 @@ install_dependencies
 
 ```
 
-Then, a main path and a log system was added to have a record of each process executed.
+Then, a primary path and a log system were added to have a record of each process executed.
 
 ```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
@@ -54,33 +58,32 @@ init_log(log_file = paste0(ppath, "Result/notame_Result/GCMS_log.txt"))
 
 ```
 
-Next...
+Next, the MZmine feature list in "notame" format was loaded.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
-data <- read_from_excel(file = "Data/Data_to_notame/MZmine_Feature_List_2Notame.xlsx", sheet = 2, 
+data <- read_from_excel(file = "Data/Data_to_notame/MZmine_Feature_List_2Notame.xlsx", sheet = 3, 
                         corner_row = 8, corner_column = "N", 
                         split_by = c("Column", "Ion mode"))
 
 ```
 
-Once the data is read, the next step was...
+Once the data was loaded, the next step was to create a MetaboSet to work with R objects from now on.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
 modes <- construct_metabosets(exprs = data$exprs, 
                               pheno_data = data$pheno_data, 
                               feature_data = data$feature_data,
                               group_col = "Group")
 
-
 ```
 
 ## Preprocessing
 
-The first step is...
+The first step of the preprocessing is to change the features with a value equal to 0 to NA.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
 # Data extraction
 mode <- modes$Rtx5MS_EI
@@ -89,29 +92,18 @@ mode <- mark_nas(mode, value = 0)
 
 ```
 
-Then...
+Then, features with low detection rates are flagged and can be ignored or removed in subsequent analysis. The “notame" package uses two criteria to flag these features: the feature presence in a percentage of QC injections and the feature presence in a percentage within a sample group or class.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
 # Low detection rate
 mode <- flag_detection(mode, qc_limit = 10/14, group_limit = 2/3)
 
 ```
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+The following preprocessing step is drift correction, which is applied using smoothed cubic spline regression. In addition, features with low quality (features out of the "RSD_r < 0.3 & D_ratio_r < 0.6" condition) are added to the “Flag” column. The value of RSD < 0.3 for considering a low-quality feature was taken from [Procedures for large-scale metabolic profiling of serum and plasma using gas chromatography and liquid chromatography coupled to mass spectrometry](https://doi.org/10.1038/nprot.2011.335).
 
-# Some statistics after low detection algorithm
-#visualizations(mode,
-#               prefix = paste0(ppath,
-#                               "Result/notame_Result/HS_GCMS/Figure/",
-#                               "Low_Detection")
-#               )
-
-```
-
-The next step...
-
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
 # Drift correction
 corrected <- correct_drift(mode)
@@ -121,7 +113,7 @@ corrected <- flag_quality(corrected,
 
 ```
 
-Then we can visualize the data after drift correction.
+Then, we can visualize the data after drift correction.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
@@ -145,9 +137,9 @@ corr_pca + corr_bp
 
 ```
 
-Contaminant...
+Contaminant peaks based on the process blank sample will be removed.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
 # Removal of contaminants
 corrected_no_blank <- flag_contaminants(corrected,
@@ -157,34 +149,34 @@ corrected_no_blank <- flag_contaminants(corrected,
                                         flag_label = "Contaminant")
 # Removal blank group from dataset
 corrected_no_blank <- corrected_no_blank[, corrected_no_blank$Group != "Blank"]
-
+pData(corrected_no_blank) <- droplevels(pData(corrected_no_blank))
 # Exporting data to clean identified features
 #write_to_excel(corrected_no_blank,
 #               "Result/notame_Result/MZmine_corrected_no_blank.xlsx")
 
 ```
 
-Dta visualization...
+We can inspect data after removing the contaminant features.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # Boxplot
 no_blank_bp <- plot_sample_boxplots(corrected_no_blank,
-                                 order_by = "QC",
-                                 fill_by = "QC")
+                                    order_by = "QC",
+                                    fill_by = "QC")
 # PCA
 no_blank_pca <- plot_pca(corrected_no_blank,
-                      center = TRUE,
-                      shape = "QC",
-                      color = "QC")
+                         center = TRUE,
+                         shape = "QC",
+                         color = "QC")
 # Plot
 no_blank_pca + no_blank_bp
 
 ```
 
-The next step...
+The next step is feature clustering. This step helps us reduce the number of features of the same molecule that were split due to a 70 eV electron ionization (EI) environment.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
 # Clustering correlated features
 clustered <- cluster_features(corrected_no_blank,
@@ -192,7 +184,7 @@ clustered <- cluster_features(corrected_no_blank,
                               corr_thresh = 0.95,
                               d_thresh = 0.80,
                               #plotting = TRUE,
-                              #prefix = paste0(ppath, "Result/notame_Result/Cluster")
+                              #prefix = paste0(ppath, "Result/notame_Result/Cluster/")
                               )
 # Extracting representative feature of each cluster
 compressed <- compress_clusters(clustered)
@@ -202,7 +194,7 @@ compressed <- compress_clusters(clustered)
 
 ```
 
-We can visualize data...
+We can inspect the data using the PCA plot after the clustering algorithm execution.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
@@ -220,19 +212,19 @@ clust_pca + clust_bp
 
 ```
 
-Finally the data is...
+Finally, the data is ready to be exported and proceed with the statistical analysis.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
-#save(imputed, file = paste0(ppath, "Result/notame_Result/HS_GCMS/Notame_HS_GC-MS_out.RData"))
+#save(compressed, file = paste0(ppath, "Result/notame_Result/notame_out.RData"))
 
 ```
 
 # PCA plots
 
-Here read this paper: https://doi.org/10.1007%2Fs11306-016-1030-9
+For PCA, we used PQN normalization with Random Forest missing value imputation and glog transformation method, which were taken from [Non-targeted UHPLC-MS metabolomic data processing methods: a comparative investigation of normalisation, missing value imputation, transformation and scaling](https://doi.org/10.1007/s11306-016-1030-9). Also, the previously cited work recommended against using any scaling method. However, we used the auto-scaling method because we found better results.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE, results='hide'}
 
 # Impute missing values using random forest
 # To clean data
@@ -243,7 +235,7 @@ imputed <- impute_rf(imputed, all_features = TRUE)
 
 ```
 
-We can inspect PCA plot after...
+We can inspect the data with the PCA plot after data imputation.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
@@ -261,9 +253,9 @@ imp_pca + imp_bp
 
 ```
 
-The next step...
+After data imputation, the final PCA plot requires data normalization by probabilistic quotient normalization (PQN).
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
 # Probabilistic quotient normalization
 pqn_set <- pqn_normalization(imputed,
@@ -273,7 +265,7 @@ pqn_set <- pqn_normalization(imputed,
 
 ```
 
-We can inspect PCA plot after...
+We can inspect the data with the PCA plot after data normalization.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
@@ -291,34 +283,21 @@ pqn_pca + pqn_bp
 
 ```
 
-## PCA of all sample
-
-Droping flagged features...
-
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
-
-# Extract clean data
-no_flag <- drop_flagged(pqn_set)
-# Extracting feature height table
-pmp_peakheight <- exprs(no_flag)
-# Extracting Phenotipic data
-pmp_phenodata <- no_flag@phenoData@data
-
-```
-
-The next step is...
+Finally, the PCA plot requires data transformation by the generalized logarithm (glog) method.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
+# Extract clean data
+ppm_noflag <- drop_flagged(pqn_set)
 # "SummarizedExperiment" package installation
 #if (!require("BiocManager", quietly = TRUE))
 #    install.packages("BiocManager")
 #BiocManager::install("SummarizedExperiment")
 library(SummarizedExperiment)
 # Convert feature height table to SummarizedExperiment class
-pmp_data <- SummarizedExperiment(assays = pmp_peakheight,
-                                 colData = pmp_phenodata)
-# Package to generalized logarithmic transform
+pmp_data <- SummarizedExperiment(assays = exprs(ppm_noflag),
+                                 colData = ppm_noflag@phenoData@data)
+# Package for generalized logarithmic transform
 #if (!requireNamespace("BiocManager", quietly = TRUE))
 #    install.packages("BiocManager")
 #BiocManager::install("pmp")
@@ -328,36 +307,38 @@ glog_exprs <- glog_transformation(df = pmp_data@assays@data@listData[[1]],
                                   classes = pmp_data$QC,
                                   qc_label = "QC")
 # Adding glog transformation to notame MetaboSet
-glog_set <- no_flag
+glog_set <- ppm_noflag
 exprs(glog_set) <- glog_exprs
 
 ```
 
-Extracting feature metadata
+## General PCA
+
+Extracting the data and metadata of notame MetaboSet for PCA plot.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # Extracting feature height table
-peak_height <- exprs(glog_set)
+pca_peakheight <- exprs(glog_set)
 # Extracting Phenotipic data
-pheno_data <- glog_set@phenoData@data
+pca_phenodata <- glog_set@phenoData@data
 
 ```
 
-Preparing data and transposing feature table.
+Transposing feature table and preparing the PCA data.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # Transposing feature height table
-transp_table  <- t(glog_set)
-# Centering and Scaling features
-ei_pca <- prcomp(transp_table, center = TRUE, scale. = TRUE)
+transp_table  <- t(pca_peakheight)
+# Centering features
+ei_pca <- prcomp(transp_table, center = TRUE, scale. = FALSE)
 
 ```
 
-Plotting PCA results.
+### Light
 
-Light condition level PCA plot
+Sunlight exposures of the plant PCA plot.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
@@ -367,7 +348,7 @@ library(dplyr)
 scores <- ei_pca$x %>%                   # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
-  left_join(pheno_data )                 # Adding metadata
+  left_join(pca_phenodata)               # Adding metadata
 # Change the order of legend column of DataFrame
 scores$Light_factor <- factor(scores$Light_factor,
                               levels = c("Light",
@@ -391,11 +372,11 @@ figure_1a <- ggplot(scores,
                               "#00BFC4")) +
   scale_shape_manual(values=c(1, 17, 15)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (15.52 %)"),
-         y=guide_axis(title = "PC2 (13.45 %)"),
+  guides(x=guide_axis(title = "PC1 (18.35 %)"),
+         y=guide_axis(title = "PC2 (15.20 %)"),
          shape = guide_legend(order = 2),
          color = guide_legend(order = 1)) +
-  labs(shape = 'Analysis group', color= 'Light level') +
+  labs(shape = 'Analysis group', color= 'Light factor') +
   theme_classic() +
 #  theme(legend.position = c(0.88, 0.80),
 #        legend.background = element_rect(fill = "white", color = "black")) +
@@ -410,7 +391,9 @@ figure_1a
 
 ```
 
-Period age level PCA plot
+### Age
+
+Plant ages PCA plot.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
@@ -418,7 +401,7 @@ Period age level PCA plot
 scores <- ei_pca$x %>%                   # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
-  left_join(pheno_data )                 # Adding metadata
+  left_join(pca_phenodata)               # Adding metadata
 # Change the order of legend column of DataFrame
 scores$Age_factor <- factor(scores$Age_factor,
                  levels = c("Early",
@@ -444,11 +427,11 @@ figure_1b <- ggplot(scores,
                               "#00BFC4")) +
   scale_shape_manual(values=c(1, 17, 15)) + 
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (15.52 %)"),
-         y=guide_axis(title = "PC2 (13.45 %)"),
+  guides(x=guide_axis(title = "PC1 (18.35 %)"),
+         y=guide_axis(title = "PC2 (15.20 %)"),
          shape = guide_legend(order = 2),
          color = guide_legend(order = 1)) +
-  labs(shape = 'Analysis group', color= 'Age level') +
+  labs(shape = 'Analysis group', color= 'Age factor') +
   theme_classic() +
 #  theme(legend.position = c(0.88, 0.77),
 #        legend.background = element_rect(fill = "white", color = "black")) +
@@ -463,7 +446,9 @@ figure_1b
 
 ```
 
-Location level PCA plot
+### Location
+
+Sample collected location PCA plot.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
@@ -471,7 +456,7 @@ Location level PCA plot
 scores <- ei_pca$x %>%                   # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
-  left_join(pheno_data )                 # Adding metadata
+  left_join(pca_phenodata)               # Adding metadata
 # Change the order of legend column of DataFrame
 scores$Location_factor <- factor(scores$Location_factor,
                  levels = c("Alto Pano",
@@ -497,9 +482,9 @@ figure_1c <- ggplot(scores,
                               "#00BFC4")) +
   scale_shape_manual(values=c(1, 17, 15)) + 
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (15.52 %)"),
-         y=guide_axis(title = "PC2 (13.45 %)")) +
-  labs(shape = 'Analysis group', color= 'Location level') +
+  guides(x=guide_axis(title = "PC1 (18.35 %)"),
+         y=guide_axis(title = "PC2 (15.20 %)")) +
+  labs(shape = 'Analysis group', color= 'Location factor') +
   theme_classic() +
 #  theme(legend.position = c(0.88, 0.77),
 #        legend.background = element_rect(fill = "white", color = "black")) +
@@ -514,7 +499,7 @@ figure_1c
 
 ```
 
-Plotting loading results.
+Plotting a loading PCA result.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
@@ -523,12 +508,12 @@ loadings <- ei_pca$rotation %>%           # Extract loadings
 
 ```
 
-Creating an artificial table with Feature name and Compound column.
+Creating an artificial table with feature names and a compound column (with identified metabolites).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide', fig.width = 20, fig.height = 10.5}
 
 # Extracting feature identified
-metab_data <- no_flag[!is.na(no_flag@featureData@data$Metabolite),]
+metab_data <- glog_set[!is.na(glog_set@featureData@data$Metabolite),]
 # Extracting metabolite table
 meta_table <- metab_data@featureData@data
 # Creating a new small table with the annotated compounds
@@ -545,13 +530,14 @@ figure_1d <- ggplot(loadings, aes(PC1, PC2)) +
        color = 'Identification level') +
   ggrepel::geom_label_repel(data = ei_compouds,
                             aes(label = meta_table$Metabolite),
-                            box.padding = 0.37,
+                            box.padding = 0.22,
                             label.padding = 0.22,
                             label.r = 0.3,
                             cex = 2.5,
-                            max.overlaps = 20) +
-  guides(x=guide_axis(title = "PC1 (15.52 %)"),
-         y=guide_axis(title = "PC2 (13.45 %)")) +
+                            max.overlaps = 7,
+                            min.segment.length = 0) +
+  guides(x=guide_axis(title = "PC1 (18.35 %)"),
+         y=guide_axis(title = "PC2 (15.20 %)")) +
   theme(legend.position = c(0.945, 0.913),
         legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
@@ -566,82 +552,72 @@ figure_1d
 
 ```
 
-## PCA of each location
+## PCA by location
 
 ### Alto Pano
 
+Extracting the Alto Pano location data.
+
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+
 # Drop factor pooled (subQC)
-no_subqc <- pqn_set[, pqn_set$Analysis_group != "Sub_Quality_Control"]
+no_subqc <- glog_set[, glog_set$Analysis_group != "Sub_Quality_Control"]
+pData(no_subqc) <- droplevels(pData(no_subqc))
 # Extracting "Alto Pano" (B) data
 b_data <- no_subqc[, no_subqc$Location_factor != "Alto Tena"]
+pData(b_data) <- droplevels(pData(b_data))
 b_data <- b_data[, b_data$Location_factor != "Talag"]
-# Extracting clean data
-b_data  <- drop_flagged(b_data)
+pData(b_data) <- droplevels(pData(b_data))
 # Extracting feature height table
-peak_height2 <- exprs(b_data )
+b_peakheight <- exprs(b_data)
 # Extracting Phenotipic data
-pheno_data2 <- b_data@phenoData@data
+b_phenodata <- b_data@phenoData@data
 
 ```
 
-The next step is...
-
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
-
-# Convert feature height table to SummarizedExperiment class
-pmp_data2 <- SummarizedExperiment(assays = peak_height2,
-                                  colData = pheno_data2)
-# Generalized logarithmic transform
-glog_set2 <- glog_transformation(df = pmp_data2@assays@data@listData[[1]],
-                                 classes = pmp_data2$QC,
-                                 qc_label = "QC")
-
-```
-
-Preparing data and transposing feature table.
+Transposing feature table and preparing the PCA data.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # Transposing feature height table
-transp_table2  <- t(glog_set2)
+b_transp_table  <- t(b_peakheight)
 # Centering and Scaling features
-ei_pca2 <- prcomp(transp_table2, center = TRUE, scale. = TRUE)
+b_pca <- prcomp(b_transp_table, center = TRUE, scale. = FALSE)
 
 ```
 
-Plotting PCA results.
+Plotting the Alto Pano PCA result.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores2 <- ei_pca2$x %>%                 # Get PC coordinates
+b_scores <- b_pca$x %>%                  # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
-  left_join(pheno_data2)                 # Adding metadata
+  left_join(b_phenodata)                 # Adding metadata
 # Change the order of legend column of DataFrame
-scores2$Age_factor <- factor(scores2$Age_factor,
-                             levels = c("Early",
-                                        "Medium",
-                                        "Late",
-                                        "QC"))
-scores2$Light_factor <- factor(scores2$Light_factor,
-                               levels = c("Light",
-                                          "Shade",
-                                          "QC"))
+b_scores$Age_factor <- factor(b_scores$Age_factor,
+                              levels = c("Early",
+                                         "Medium",
+                                         "Late",
+                                         "QC"))
+b_scores$Light_factor <- factor(b_scores$Light_factor,
+                                levels = c("Light",
+                                           "Shade",
+                                           "QC"))
 # PCA plot
-figure_s1a <- ggplot(scores2,
-                    aes(PC1, PC2, shape = Age_factor,
-                        color = Light_factor)) +
+figure_s1a <- ggplot(b_scores,
+                     aes(PC1, PC2, shape = Age_factor,
+                         color = Light_factor)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (26.25 %)"),
-         y=guide_axis(title = "PC2 (18.82 %)")) +
+  guides(x=guide_axis(title = "PC1 (32.40 %)"),
+         y=guide_axis(title = "PC2 (21.22 %)")) +
   scale_color_manual(values=c("#F5BC5CFF",
                               "#32373AFF",
                               "#00BFC4")) +
   scale_shape_manual(values=c(16, 17, 15, 8)) + 
-  labs(shape = 'Age level',
-       color='Light level') +
+  labs(shape = 'Age factor',
+       color='Light factor') +
   theme_classic() +
 #  theme(legend.position = c(0.90, 0.65),
 #        legend.background = element_rect(fill = "white", color = "black")) +
@@ -656,40 +632,40 @@ figure_s1a
 
 ```
 
-Plotting loading results.
+Plotting the Alto Pano loading PCA result.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
-loadings2 <- ei_pca2$rotation %>%         # Extract loadings
+b_loadings <- b_pca$rotation %>%          # Extract loadings
   data.frame(Feature_ID = rownames(.))    # New column with feat name
 
 ```
 
-Creating an artificial table with Feature name and Compound column.
+Creating an artificial table with feature names and a compound column (with identified metabolites).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide', fig.width = 20, fig.height = 10.5}
 
 # Creating a new small table with the annotated compounds
-ei_compouds2 <- left_join(meta_table, loadings2)
+b_compouds <- left_join(meta_table, b_loadings)
 # Plotting results
-figure_s1d <- ggplot(loadings2, aes(PC1, PC2)) +
+figure_s1d <- ggplot(b_loadings, aes(PC1, PC2)) +
   geom_point(alpha = 0.2) +
   theme_classic() + 
-  geom_point(data = ei_compouds2,
+  geom_point(data = b_compouds,
              aes(shape = meta_table$Identification_level,
                  color = meta_table$Identification_level),
              size = 2) +
   labs(shape = 'Identification level',
        color = 'Identification level') +
-  ggrepel::geom_label_repel(data = ei_compouds2,
+  ggrepel::geom_label_repel(data = b_compouds,
                             aes(label = meta_table$Metabolite),
                             box.padding = 0.37,
                             label.padding = 0.22,
                             label.r = 0.30,
                             cex = 2.5,
-                            max.overlaps = 20) +
-  guides(x=guide_axis(title = "PC1 (26.25 %)"),
-         y=guide_axis(title = "PC2 (18.82 %)")) +
+                            max.overlaps = 7) +
+  guides(x=guide_axis(title = "PC1 (32.40 %)"),
+         y=guide_axis(title = "PC2 (21.22 %)")) +
   theme(legend.position = c(0.945, 0.913),
         legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
@@ -706,77 +682,65 @@ figure_s1d
 
 ### Alto Tena
 
+Extracting the Alto Tena location data.
+
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # Extracting "Alto Tena" (C) data
 c_data <- no_subqc[, no_subqc$Location_factor != "Alto Pano"]
+pData(c_data) <- droplevels(pData(c_data))
 c_data <- c_data[, c_data$Location_factor != "Talag"]
-# Extracting clean data
-c_data  <- drop_flagged(c_data)
+pData(c_data) <- droplevels(pData(c_data))
 # Extracting feature height table
-peak_height3 <- exprs(c_data )
+c_peakheight <- exprs(c_data )
 # Extracting Phenotipic data
-pheno_data3 <- c_data@phenoData@data
+c_phenodata <- c_data@phenoData@data
 
 ```
 
-The next step is...
-
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
-
-# Convert feature height table to SummarizedExperiment class
-pmp_data3 <- SummarizedExperiment(assays = peak_height3,
-                                  colData = pheno_data3)
-# Generalized logarithmic transform
-glog_set3 <- glog_transformation(df = pmp_data3@assays@data@listData[[1]],
-                                 classes = pmp_data3$QC,
-                                 qc_label = "QC")
-
-```
-
-Preparing data and transposing feature table.
+Transposing feature table and preparing the PCA data.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # Transposing feature height table
-transp_table3  <- t(glog_set3)
+c_transptable  <- t(c_peakheight)
 # Centering and Scaling features
-ei_pca3 <- prcomp(transp_table3, center = TRUE, scale. = TRUE)
+c_pca <- prcomp(c_transptable, center = TRUE, scale. = FALSE)
 
 ```
 
-Plotting PCA results.
+Plotting the Alto Tena PCA result.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores3 <- ei_pca3$x %>%                 # Get PC coordinates
+c_scores <- c_pca$x %>%                  # Get PC coordinates
   data.frame %>%                         # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%    # Create a new column with the sample names
-  left_join(pheno_data3)                 # Adding metadata
+  left_join(c_phenodata)                 # Adding metadata
 # Change the order of legend column of DataFrame
-scores3$Age_factor <- factor(scores3$Age_factor,
-                             levels = c("Early",
-                                        "Medium",
-                                        "Late",
-                                        "QC"))
-scores3$Light_factor <- factor(scores3$Light_factor,
-                               levels = c("Light",
-                                          "Shade",
-                                          "QC"))
+c_scores$Age_factor <- factor(c_scores$Age_factor,
+                              levels = c("Early",
+                                         "Medium",
+                                         "Late",
+                                         "QC"))
+c_scores$Light_factor <- factor(c_scores$Light_factor,
+                                levels = c("Light",
+                                           "Shade",
+                                           "QC"))
 # PCA plot
-figure_s1b <- ggplot(scores3,
+figure_s1b <- ggplot(c_scores,
                     aes(PC1, PC2, shape = Age_factor,
                         color = Light_factor)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (22.16 %)"),
-         y=guide_axis(title = "PC2 (13.74 %)")) +
+  guides(x=guide_axis(title = "PC1 (24.53 %)"),
+         y=guide_axis(title = "PC2 (16.96 %)")) +
   scale_color_manual(values=c("#F5BC5CFF",
                               "#32373AFF",
                               "#00BFC4")) +
   scale_shape_manual(values=c(16, 17, 15, 8)) + 
-  labs(shape = 'Age level',
-       color = 'Light level') +
+  labs(shape = 'Age factor',
+       color = 'Light factor') +
   theme_classic() +
 #  theme(legend.position = c(0.08, 0.65),
 #        legend.background = element_rect(fill = "white", color = "black")) +
@@ -791,40 +755,40 @@ figure_s1b
 
 ```
 
-Plotting loading results.
+Plotting the Alto Tena loading PCA result.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
-loadings3 <- ei_pca3$rotation %>%         # Extract loadings
+c_loadings <- c_pca$rotation %>%          # Extract loadings
   data.frame(Feature_ID = rownames(.))    # New column with feat name
 
 ```
 
-Creating an artificial table with Feature name and Compound column.
+Creating an artificial table with feature names and a compound column (with identified metabolites).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide', fig.width = 20, fig.height = 10.5}
 
 # Creating a new small table of the annotated compounds
-ei_compouds3 <- left_join(meta_table, loadings3)
+c_compouds <- left_join(meta_table, c_loadings)
 # Plotting results
-figure_s1e <- ggplot(loadings3, aes(PC1, PC2)) +
+figure_s1e <- ggplot(c_loadings, aes(PC1, PC2)) +
   geom_point(alpha = 0.2) +
   theme_classic() + 
-  geom_point(data = ei_compouds3,
+  geom_point(data = c_compouds,
              aes(shape = meta_table$Identification_level,
                  color = meta_table$Identification_level),
              size = 2) +
   labs(shape = 'Identification level',
        color = 'Identification level') +
-  ggrepel::geom_label_repel(data = ei_compouds3,
+  ggrepel::geom_label_repel(data = c_compouds,
                             aes(label = meta_table$Metabolite),
                             box.padding = 0.37,
                             label.padding = 0.22,
                             label.r = 0.30,
                             cex = 2.5,
-                            max.overlaps = 20) +
-  guides(x=guide_axis(title = "PC1 (22.16 %)"),
-         y=guide_axis(title = "PC2 (13.74 %)")) +
+                            max.overlaps = 7) +
+  guides(x=guide_axis(title = "PC1 (24.53 %)"),
+         y=guide_axis(title = "PC2 (16.96 %)")) +
   theme(legend.position = c(0.945, 0.913),
         legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
@@ -841,79 +805,65 @@ figure_s1e
 
 ### Talag
 
+Extracting the Talag location data.
+
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # Extracting "Talag" (A) data
 a_data <- no_subqc[, no_subqc$Location_factor != "Alto Pano"]
+pData(a_data) <- droplevels(pData(a_data))
 a_data <- a_data[, a_data$Location_factor != "Alto Tena"]
-# Extracting clean data
-a_data  <- drop_flagged(a_data)
+pData(a_data) <- droplevels(pData(a_data))
 # Extracting feature height table
-peak_height4 <- exprs(a_data )
+a_peakheight <- exprs(a_data )
 # Extracting Phenotipic data
-pheno_data4 <- a_data@phenoData@data
+a_phenodata <- a_data@phenoData@data
 
 ```
 
-The next step is...
-
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
-
-# Convert feature height table to SummarizedExperiment class
-pmp_data4 <- SummarizedExperiment(assays = peak_height4,
-                                  colData = pheno_data4)
-# Generalized logarithmic transform
-glog_set4 <- glog_transformation(df = pmp_data4@assays@data@listData[[1]],
-                                 classes = pmp_data4$QC,
-                                 qc_label = "QC")
-
-```
-
-Preparing data and transposing feature table.
+Transposing feature table and preparing the PCA data.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # Transposing feature height table
-transp_table4  <- t(glog_set4)
+a_transptable  <- t(a_peakheight)
 # Centering and Scaling features
-ei_pca4 <- prcomp(transp_table4, center = TRUE, scale. = TRUE)
+a_pca <- prcomp(a_transptable, center = TRUE, scale. = FALSE)
 
 ```
 
-Plotting PCA results.
-
-Light level PCA plot
+Plotting the Talag PCA result.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # PCA scores
-scores4 <- ei_pca4$x %>%                # Get PC coordinates
+a_scores <- a_pca$x %>%                 # Get PC coordinates
   data.frame %>%                        # Convert to data frames
   mutate(Sample_ID = rownames(.)) %>%   # Create a new column with the sample names
-  left_join(pheno_data4)                # Adding metadata
+  left_join(a_phenodata)                # Adding metadata
 # Change the order of legend column of DataFrame
-scores4$Age_factor <- factor(scores4$Age_factor,
-                             levels = c("Early",
-                                        "Medium",
-                                        "Late",
-                                        "QC"))
-scores4$Light_factor <- factor(scores4$Light_factor,
+a_scores$Age_factor <- factor(a_scores$Age_factor,
+                              levels = c("Early",
+                                         "Medium",
+                                         "Late",
+                                         "QC"))
+a_scores$Light_factor <- factor(a_scores$Light_factor,
                                levels = c("Light",
                                           "Shade",
                                           "QC"))
 # PCA plot
-figure_s1c <- ggplot(scores4,
+figure_s1c <- ggplot(a_scores,
                     aes(PC1, PC2, shape = Age_factor,
                         color = Light_factor)) +
   geom_point(size = 3) +
-  guides(x=guide_axis(title = "PC1 (25.06 %)"),
-         y=guide_axis(title = "PC2 (16.53 %)")) +
+  guides(x=guide_axis(title = "PC1 (31.23 %)"),
+         y=guide_axis(title = "PC2 (21.11 %)")) +
   scale_color_manual(values=c("#F5BC5CFF",
                               "#32373AFF",
                               "#00BFC4")) +
   scale_shape_manual(values=c(16, 17, 15, 8)) + 
-  labs(shape = 'Age level',
-       color='Light level') +
+  labs(shape = 'Age factor',
+       color = 'Light factor') +
   theme_classic() +
 #  theme(legend.position = c(1.08, 0.65),
 #        legend.background = element_rect(fill = "white", color = "black")) +
@@ -928,40 +878,40 @@ figure_s1c
 
 ```
 
-Plotting loading results.
+Plotting the Talag loading PCA result.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
-loadings4 <- ei_pca4$rotation %>%         # Extract loadings
+a_loadings <- a_pca$rotation %>%          # Extract loadings
   data.frame(Feature_ID = rownames(.))    # New column with feat name
 
 ```
 
-Creating an artificial table with Feature name and Compound column.
+Creating an artificial table with feature names and a compound column (with identified metabolites).
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide', fig.width = 20, fig.height = 10.5}
 
 # Creating a new small table of the annotated compounds
-ei_compouds4 <- left_join(meta_table, loadings4)
+a_compouds <- left_join(meta_table, a_loadings)
 # Plotting results
-figure_s1f <- ggplot(loadings4, aes(PC1, PC2)) +
+figure_s1f <- ggplot(a_loadings, aes(PC1, PC2)) +
   geom_point(alpha = 0.2) +
   theme_classic() + 
-  geom_point(data = ei_compouds4,
+  geom_point(data = a_compouds,
              aes(shape = meta_table$Identification_level,
                  color = meta_table$Identification_level),
              size = 2) +
   labs(shape = 'Identification level',
        color = 'Identification level') +
-  ggrepel::geom_label_repel(data = ei_compouds4,
+  ggrepel::geom_label_repel(data = a_compouds,
                             aes(label = meta_table$Metabolite),
                             box.padding = 0.37,
                             label.padding = 0.22,
                             label.r = 0.30,
                             cex = 2.5,
-                            max.overlaps = 20) +
-  guides(x=guide_axis(title = "PC1 (25.06 %)"),
-         y=guide_axis(title = "PC2 (16.53 %)")) +
+                            max.overlaps = 7) +
+  guides(x=guide_axis(title = "PC1 (31.23 %)"),
+         y=guide_axis(title = "PC2 (21.11 %)")) +
   theme(legend.position = c(0.945, 0.913),
         legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(), 
@@ -978,9 +928,9 @@ figure_s1f
 
 # Heatmap plot
 
-Heatmap of identified metabolites.
+Only the annotated features were used to visualize the heatmap plot better. Also, the PCA result showed more clear separation of the levels in the SubQC than individual samples; for this reason, the SubQC data was used in the heatmap analysis. For this, the ComplexHeatmap package will be used.
 
-ComplexHeatmap package and dependency package installation.
+ComplexHeatmap package and other dependency package installation.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
@@ -1011,143 +961,73 @@ library(classyfireR)
 
 ```
 
-ClassyFire metabolite class classification.
+The metabolites were classified using the [ClassyFireR](https://doi.org/10.1186/s13321-016-0174-y) to add these metabolite classifications to the heatmap plot.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
-InChI_Keys <- c("QEOHJVNDENHRCH-VOTSOKGWSA-N",
-                "JMFRWRFFLBVWSI-NSCUHMNNSA-N",
-                "CCRCUPLGCSFEDV-BQYQJAHWSA-N",
-                "RJXKHBTYHGBOKV-VQHVLOKHSA-N",
-                "OSQBCSHERZVUGW-UHFFFAOYSA-N",
-                "NIIUIBKEGRPPDK-UHFFFAOYSA-N",
-                "LQZZUXJYWNFBMV-UHFFFAOYSA-N",
-                "BXWNKGSJHAJOGX-UHFFFAOYSA-N",
-                "CSQGINGXEBQJPA-UHFFFAOYSA-N",
-                "HLZKNKRTKFSKGZ-UHFFFAOYSA-N",
-                "ABFCOJLLBHXNOU-UHFFFAOYSA-N",
-                "CDAWCLOXVUBKRW-UHFFFAOYSA-N",
-                "BBNYCLAREVXOSG-UHFFFAOYSA-N",
-                "OLNJUISKUQQNIM-UHFFFAOYSA-N",
-                "BVNCCXWAZAZQNM-AATRIKPKSA-N",
-                "VYKLRWGPNUVKNC-AATRIKPKSA-N",
-                "NOORESDHJXLGAO-AATRIKPKSA-N",
-                "PGSWEKYNAOWQDF-UHFFFAOYSA-N",
-                "HFLGBNBLMBSXEM-UHFFFAOYSA-N",
-                "ZBCATMYQYDCTIZ-UHFFFAOYSA-N",
-                "YOMSJEATGXXYPX-UHFFFAOYSA-N",
-                "BKASXWPLSXFART-HTQZYQBOSA-N",
-                "XEVQXKKKAVVSMW-UHFFFAOYSA-N",
-                "OJOBTAOGJIWAGB-UHFFFAOYSA-N",
-                "DTUQWGWMVIHBKE-UHFFFAOYSA-N",
-                "WPYMKLBDIGXBTP-UHFFFAOYSA-N",
-                "UEEJDIUOCUCVHN-UHFFFAOYSA-N",
-                "FSSVRXASHHVANB-UHFFFAOYSA-N",
-                "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
-                "QHJGZUSJKGVMTF-UHFFFAOYSA-N",
-                "RQCMOYRPNPEGDL-UHFFFAOYSA-N",
-                "YCIMNLLNPGFGHC-UHFFFAOYSA-N",
-                "JNSUZRHLHDQGPN-HJWRWDBZSA-N",
-                "HBEDSQVIWPRPAY-UHFFFAOYSA-N",
-                "NMEZJSDUZQOPFE-UHFFFAOYSA-N",
-                "CFAKWWQIUFSQFU-UHFFFAOYSA-N",
-                "DIOQZVSQGTUSAI-UHFFFAOYSA-N",
-                "RPEASMBMVIKUTH-UHFFFAOYSA-N",
-                "KNHUHSLRIKTCIY-UHFFFAOYSA-N",
-                "MWOMNLDJNQWJMK-UHFFFAOYSA-N",
-                "PHOPGVYKZWPIGA-UHFFFAOYSA-N",
-                "LIKYNOPXHGPMIH-UHFFFAOYSA-N",
-                "JRXXLCKWQFKACW-UHFFFAOYSA-N",
-                "HOWGUJZVBDQJKV-UHFFFAOYSA-N",
-                "UAUDZVJPLUQNMU-KTKRTIGZSA-N",
-                "QVGDVJSCRGIGEX-WAYWQWQTSA-N",
-                "XIRNKXNNONJFQO-UHFFFAOYSA-N",
-                "LFVCJQWZGDLHSD-UHFFFAOYSA-N",
-                "LHGVFZTZFXWLCP-UHFFFAOYSA-N",
-                "FNAZRRHPUDJQCJ-UHFFFAOYSA-N",
-                "HMSWAIKSFDFLKN-UHFFFAOYSA-N",
-                "XMIIGOLPHOKFCH-UHFFFAOYSA-N",
-                "QIGBRXMKCJKVMJ-UHFFFAOYSA-N",
-                "SIKJAQJRHWYJAI-UHFFFAOYSA-N",
-                "MGWAVDBGNNKXQV-UHFFFAOYSA-N",
-                "TWNIBLMWSKIRAT-BYIBVSMXSA-N",
-                "NITWSHWHQAQBAW-QPJJXVBHSA-N",
-                "YZEGGKQFWJCIQG-UHFFFAOYSA-N",
-                "HLMFEOFHBFXLNZ-UHFFFAOYSA-N",
-                "UQDUPQYQJKYHQI-UHFFFAOYSA-N",
-                "DVWSXZIHSUZZKJ-YSTUJMKBSA-N",
-                "QYDYPVFESGNLHU-KHPPLWFESA-N",
-                "FLIACVVOZYBSBS-UHFFFAOYSA-N",
-                "IZFGRAGOVZCUFB-CMDGGOBGSA-N",
-                "LFHHOHMIVKIHMG-UHFFFAOYSA-N",
-                "CUBICSJJYOPOIA-UHFFFAOYSA-N",
-                "LQERIDTXQFOHKA-UHFFFAOYSA-N",
-                "RZJRJXONCZWCBN-UHFFFAOYSA-N",
-                "IPCSVZSSVZVIGE-UHFFFAOYSA-N",
-                "YKNWIILGEFFOPE-UHFFFAOYSA-N",
-                "ISWSIDIOOBJBQZ-UHFFFAOYSA-N",
-                "WRMNZCZEMHIOCP-UHFFFAOYSA-N",
-                "BOTWFXYSPFMFNR-HMMYKYKNSA-N",
-                "UUTGCNVYKLQLRV-UHFFFAOYSA-N",
-                "YYPNJNDODFVZLE-UHFFFAOYSA-N",
-                "YYGNTYWPHWGJRM-AAJYLUCBSA-N",
-                "LZFOPEXOUVTGJS-ONEGZZNKSA-N",
-                "KLIDCXVFHGNTTM-UHFFFAOYSA-N",
-                "POOSGDOYLQNASK-UHFFFAOYSA-N",
-                "YAPQBXQYLJRXSA-UHFFFAOYSA-N",
-                "ZFXYFBGIUFBOJW-UHFFFAOYSA-N",
-                "UIERETOOQGIECD-ONEGZZNKSA-N",
-                "YFHOHYAUMDHSBX-SNAWJCMRSA-N",
-                "RSJKGSCJYJTIGS-UHFFFAOYSA-N",
-                "MWOOGOJBHIARFG-UHFFFAOYSA-N",
-                "XDVDHFJMCJWDPI-UHFFFAOYSA-N")
+# InChI key of the metabolites you want to classify
+InChI_Keys <- c(Benzeneacetaldehyde = "DTUQWGWMVIHBKE-UHFFFAOYSA-N")
+# Get classification
 Classification_List <- purrr::map(InChI_Keys, get_classification)
+Classification_List
 
 ```
 
-## Heatmap of subQC
+## Heatmap of age
 
-Extracting and loaded of identified metabolites abundance.
+Scaling by  Auto-Scaling method and age factor data extraction.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-# Extracting identified metabolites
-hm_set <- imputed[!is.na(imputed@featureData@data$Metabolite),]
-# Probabilistic quotient normalization
-hm_pqn <- pqn_normalization(hm_set,
-                            ref = c("qc", "all"),
-                            method = c("median", "mean"),
-                            all_features = TRUE)
+
+
+
+
 # Convert feature height table to SummarizedExperiment class
-hm_pmp <- SummarizedExperiment(assays = exprs(hm_pqn),
-                               colData = hm_pqn@phenoData@data)
+hm_pmp <- SummarizedExperiment(assays = pca_peakheight,
+                               colData = pca_phenodata)
 # Generalised logarithmic transform
 hm_glog <- glog_transformation(df = hm_pmp@assays@data@listData[[1]],
                                classes = hm_pmp$QC,
                                qc_label = "QC")
+
+
+
 # Scaling by autoscaling method
 hm_scl <- scale(t(hm_glog), center = TRUE, scale = TRUE)
+hm_scl <- t(hm_scl)
+
+
+
 # Adding autoscaling data to notame MetaboSet
-scl_set <- hm_pqn
-exprs(scl_set) <- t(hm_scl)
+hm_scl_set <- no_flag
+exprs(hm_scl_set) <- hm_scl
 # Drop QC
-hm_no_qc <- drop_qcs(scl_set)
+hm_no_qc <- drop_qcs(hm_scl_set)
 # Drop samples
 hm_no_sample <- hm_no_qc[, hm_no_qc$Analysis_group != "Sample"]
+pData(hm_no_sample) <- droplevels(pData(hm_no_sample))
+# Extracting levels of age factor
+hm_age <- hm_no_sample[, hm_no_sample$Age_factor != "Other factor"]
+pData(hm_age) <- droplevels(pData(hm_age))
+# Extracting identified metabolites
+hm_age_set <- hm_age[!is.na(hm_age@featureData@data$Metabolite),]
+# Adding tukey test result
+hm_age_set <- join_fData(hm_age_set, hm_tk_table)
 
 ```
 
-Scaling, row and top heatmap anotation.
+Row and top heatmap annotation.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, fig.width = 9, fig.height = 15}
 
 set.seed(2571)
 # Extracting feature height table
-hm_height <- exprs(hm_no_sample)
+hm_height <- exprs(hm_age_set)
 # Extracting sample information
-hm_pdata <- hm_no_sample@phenoData@data
+hm_pdata <- hm_age_set@phenoData@data
 # Extracting feature information
-hm_fdata <- hm_no_sample@featureData@data
+hm_fdata <- hm_age_set@featureData@data
 # Adding row and column name
 rownames(hm_height) <- hm_fdata$Metabolite
 colnames(hm_height) <- hm_pdata$Group
@@ -1161,9 +1041,27 @@ cols_metclass <- c("Organic oxygen compounds" = "#C8876EFF",
                    "Hydrocarbons" = "#E0D2B5FF")
 # Add row anotation to HeatMap
 hm_row_ann <- rowAnnotation(`Superclass` = hm_fdata$classyfireR_Superclass,
+                            `Tukey test 2` = anno_text(hm_fdata$Late,
+                                                       location = 0.5,
+                                                       just = "center",
+                                                       gp = gpar(fill = "#F8766D",
+                                                                 col = "#666666"),
+                                                       show_name = TRUE),
+                            `Tukey test 1` = anno_text(hm_fdata$Medium,
+                                                       location = 0.5,
+                                                       just = "center",
+                                                       gp = gpar(fill = "#00B0F6",
+                                                                 col = "#666666"),
+                                                       show_name = TRUE),
+                            `Tukey test 0` = anno_text(hm_fdata$Early,
+                                                       location = 0.5,
+                                                       just = "center",
+                                                       gp = gpar(fill = "#E76BF3",
+                                                                 col = "#666666"),
+                                                       show_name = TRUE),
                             col = list(`Superclass` = cols_metclass),
                             show_annotation_name = T,
-                            show_legend=F)
+                            show_legend = F)
 # Factor levels color
 cols_levels <- c("Shade" = "#32373AFF",
                  "Early" = "#E76BF3",
@@ -1182,8 +1080,8 @@ cols_location <- c("Alto Pano" = "#B24422FF",
                    "Alto Tena" = "#4F9D4EFF",
                    "Talag" = "#4457A5FF")
 # Add top anotation to HeatMap
-top_info_ann <- HeatmapAnnotation(`Factor levels` = hm_pdata$Group,
-                                  col = list(`Factor levels` = cols_levels),
+top_info_ann <- HeatmapAnnotation(`Age factor` = hm_pdata$Group,
+                                  col = list(`Age factor` = cols_levels),
                                   show_annotation_name = T,
                                   show_legend=F, 
                                   border = TRUE)
@@ -1201,7 +1099,8 @@ hm_plot <- Heatmap(hm_height,
                    right_annotation = hm_row_ann,
                    row_names_max_width = unit(10, "cm"),
                    show_heatmap_legend = FALSE,
-                   row_km = 3, column_km = 3)
+                   row_km = 3, column_km = 2,
+                   row_title = c("a", "b", "c"))
 hm_plot
 
 ```
@@ -1219,9 +1118,9 @@ lgd2 <- Legend(labels = c("Light",
                           "Shade"),
                legend_gp = gpar(fill = cols_light),
                title = "Light level", ncol = 1)
-lgd3 <- Legend(labels = c("Early",
-                          "Medium",
-                          "Late"),
+lgd3 <- Legend(labels = c("Early (0)",
+                          "Medium (1)",
+                          "Late (2)"),
                legend_gp = gpar(fill = cols_age),
                title = "Age level", ncol = 1)
 lgd4 <- Legend(labels = c("Alto Pano",
@@ -1236,9 +1135,9 @@ lgd5 <- Legend(labels = c(unique(hm_fdata$classyfireR_Superclass)),
 
 ```
 
-ComplexHeatmap plot
+Heatmap plot.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, fig.width = 9, fig.height = 15}
 
 set.seed(2571)
 # Converting to ggplot
@@ -1246,9 +1145,9 @@ gg_heatmap <- grid.grabExpr(draw(hm_plot))
 gg_heatmap <- ggpubr::as_ggplot(gg_heatmap)
 # Legends
 all_legends <- packLegend(lgd1,
-                          lgd2,
+                          #lgd2,
                           lgd3,
-                          lgd4,
+                          #lgd4,
                           lgd5,
                           direction = "horizontal")
 gg_legend <- grid.grabExpr(draw(all_legends))
@@ -1259,9 +1158,9 @@ gcms_hm <- plot_grid(gg_legend_fn,
                      rel_heights = c(0.045, 0.880))
 gcms_hm
 # Save heatmap plot
-#ggsave(filename = "Result/notame_Result/Figure_2.pdf", plot = gcms_hm,
+#ggsave(filename = "Result/notame_Result/Figure_2a.pdf", plot = gcms_hm,
 #       width = 7, height = 10, units = "in", dpi = 300, scale = 1.7)
-#ggsave(filename = "Result/notame_Result/Figure_2.png", plot = gcms_hm,
+#ggsave(filename = "Result/notame_Result/Figure_2a.png", plot = gcms_hm,
 #       width = 7, height = 10, units = "in", dpi = 300, scale = 1.7)
 
 ```
@@ -1368,39 +1267,71 @@ ggsave(filename = "Result/notame_Result/Figure_s4.png", plot = gcms_hm1,
 
 ```
 
-
 # Exporting plot
 
-## PCA plot of all samples
+## General PCA
+
+Merge of score and loading plots of PCA analysis.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
+# Library loading
+library(gridExtra)
 # Figure matrix
 figure_1 <- arrangeGrob(figure_1a,
                         figure_1b,
                         figure_1c,
                         figure_1d,
                         layout_matrix = rbind(c(1, 2, 3),
-                                               c(4, 4, 4),
-                                               c(4, 4, 4)))
+                                              c(4, 4, 4),
+                                              c(4, 4, 4)))
 # Adding label to the figures
 figure_one <- ggpubr::as_ggplot(figure_1) +
   draw_plot_label(label = LETTERS[1:4],
                   x = c(0, 0.332, 0.665, 0),
                   y = c(.99, .99, .99, .656))
 # Exporting (*.pdf) file
-#ggsave(filename = "Result/notame_Result/figure_1.pdf", plot = figure_one,
-#      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
+ggsave(filename = "Result/notame_Result/figure_1_glog.pdf", plot = figure_one,
+      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
 # Exporting (*.png) file
-#ggsave(filename = "Result/notame_Result/figure_1.png", plot = figure_one,
-#      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
+ggsave(filename = "Result/notame_Result/figure_1_glog.png", plot = figure_one,
+      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
 # Exporting (*.jpg) file
-#ggsave(filename = "Result/notame_Result/figure_1.jpg", plot = figure_one,
+#ggsave(filename = "Result/notame_Result/figure_1_glog.jpg", plot = figure_one,
 #      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
 
 ```
 
-## PCA plot of each location
+PCA score plots of different factors.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Figure matrix
+figure_1_pca <- arrangeGrob(figure_1a,
+                            figure_1b,
+                            figure_1c,
+                            layout_matrix = rbind(c(1, 2, 3)))
+# Adding label to the figures
+figure_one_pca <- ggpubr::as_ggplot(figure_1_pca) +
+  draw_plot_label(label = LETTERS[1:3],
+                  x = c(0, 0.332, 0.665),
+                  y = c(.99, .99, .99))
+# Exporting (*.pdf) file
+#ggsave(filename = "Result/notame_Result/figure_1_glog_pca.pdf",
+#       plot = figure_one_pca, width = 175, height = 45, units = "mm",
+#       dpi = 300, scale = 2.5)
+# Exporting (*.png) file
+#ggsave(filename = "Result/notame_Result/figure_1_glog_pca.png",
+#       plot = figure_one_pca, width = 175, height = 45, units = "mm",
+#       dpi = 300, scale = 2.5)
+# Exporting (*.jpg) file
+#ggsave(filename = "Result/notame_Result/figure_1_glog_pca.jpg",
+#       plot = figure_one_pca, width = 175, height = 45, units = "mm",
+#       dpi = 300, scale = 2.5)
+
+```
+
+## PCA by location
 
 ### Alto Pano
 
@@ -1489,6 +1420,30 @@ figure_sthree <- ggpubr::as_ggplot(figure_s3) +
 
 ```
 
+## Age plots
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Figure matrix
+figure_2 <- arrangeGrob(gcms_hm,
+                        vc_plot,
+                        layout_matrix = rbind(c(1, 2)))
+# Adding label to the figures
+figure_two <- ggpubr::as_ggplot(figure_2) +
+  draw_plot_label(label = LETTERS[1:2],
+                  x = c(0, 0.5),
+                  y = c(.99, .99))
+# Exporting (*.pdf) file
+ggsave(filename = "Result/notame_Result/figure_2.pdf", plot = figure_two,
+      width = 175, height = 155, units = "mm", dpi = 300, scale = 2.5)
+# Exporting (*.png) file
+ggsave(filename = "Result/notame_Result/figure_2.png", plot = figure_two,
+      width = 175, height = 155, units = "mm", dpi = 300, scale = 2.5)
+# Exporting (*.jpg) file
+#ggsave(filename = "Result/notame_Result/figure_2.jpg", plot = figure_two,
+#      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
+
+```
 
 
 
