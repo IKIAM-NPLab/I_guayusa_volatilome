@@ -238,17 +238,343 @@ sp_vc_plot
 
 ```
 
-# Tukey Test
+# Tukey test
 
-XXXXX
+The tukey test was implemented to support the multivariate statistic by analyzing individual identified metabolites between age factors (with three levels: early, medium, and late). Only metabolites with data homoscedasticity were considered for the ANOVA test, and metabolites with significance (p-value < 0.05) were used for the Tukey test. The generalized logarithm (glog) transformed data was used for the Tukey test.
+
+Previously, we tested with the auto-scaled data and found that seven metabolites did not satisfy the data homoscedasticity. On the other hand, when we tested with the glog-transformed data, only two metabolites did not satisfy the data homoscedasticity. For the above reasons, we used log-transformed data for the Tukey test.
+
+We analyzed two batches of data, one of the SubQC data and the other of the individual data.
 
 ## SubQC
 
-XXXXX
+SubQC data extraction for Tukey test calculation.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Drop QC
+tk_no_qc <- drop_qcs(glog_set)
+# Drop samples
+tk_no_sample <- tk_no_qc[, tk_no_qc$Analysis_group != "Sample"]
+pData(tk_no_sample) <- droplevels(pData(tk_no_sample))
+# Extracting levels of age factor
+tk_age <- tk_no_sample[, tk_no_sample$Age_factor != "Other factor"]
+pData(tk_age) <- droplevels(pData(tk_age))
+# Extracting identified metabolites
+tk_age_set <- tk_age[!is.na(tk_age@featureData@data$Metabolite),]
+
+```
+
+Preparing data and metadata for Tukey test calculation.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Extracting feature height table
+tk_height <- exprs(tk_age_set)
+# Extracting sample information
+tk_pdata <- tk_age_set@phenoData@data
+tk_pdata <- data.frame(Sample_ID = tk_pdata$Sample_ID,
+                       Age_factor = tk_pdata$Age_factor)
+# Extracting feature information
+tk_fdata <- tk_age_set@featureData@data
+tk_fdata <- data.frame(Feature_ID = tk_fdata$Feature_ID,
+                       Metabolite = tk_fdata$Metabolite)
+# Transposing feature height table
+tk_height <- t(tk_height)
+# Feature height table to dataframe
+tk_height <- as.data.frame(tk_height)
+# Convert the row names to sample ID
+tk_height <- tk_height %>% 
+  mutate(Sample_ID = rownames(tk_height))
+# Adding age factor as variable
+tk_height <- left_join(tk_pdata, tk_height)
+
+```
+
+The data is ready to test the data homoscedasticity. The Bartlett test was used to inspect the homogeneity of variance.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Create two empty vectors to add results
+Feature_ID <- c()
+bartlett_pValue <- c()
+# Batch analysis
+for(i in 3:80) {
+  bar_res <- bartlett.test(tk_height[, i] ~ tk_height$Age_factor,
+                           data = tk_height)
+  bartlett_pValue <- c(bartlett_pValue, bar_res[["p.value"]])
+  Feature_ID <- c(Feature_ID, names(tk_height[i]))
+  tk_bar_res <- data.frame(Feature_ID, bartlett_pValue)
+}
+# Adding a description of the p-value
+tk_bar_res <- tk_bar_res %>%
+  mutate(bartlett_group = ifelse(bartlett_pValue > 0.05,
+                                 "equal variance",
+                                 "Unequal variance"))
+
+```
+
+Most metabolites showed equality of variances according to the Bartlett test. The next step will be the ANOVA test.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Create two empty vectors to add results
+Feature_ID <- c()
+anova_pValue <- c()
+# Batch analysis
+for(i in 3:80) {
+  anova_model <- glm(tk_height[, i] ~ tk_height$Age_factor, data = tk_height)
+  anova_res <- anova(anova_model, test = "LRT")
+  anova_pValue <- c(anova_pValue, anova_res$`Pr(>Chi)`[2])
+  Feature_ID <- c(Feature_ID, names(tk_height[i]))
+  tk_anova_res <- data.frame(Feature_ID, anova_pValue)
+}
+# Adding a description of the p-value
+tk_anova_res <- tk_anova_res %>%
+  mutate(anova_group = ifelse(anova_pValue > 0.05,
+                              "Not Significant",
+                              "Significant"))
+
+```
+
+Consequently, the features with significance (p-value < 0.05) according to ANOVA were used for the Tukey test. Tukey test groups the different variables (in this case, the levels of age factor: early, medium, and late) using significance tests.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# agricolae package installation and library loadding
+#install.packages("agricolae", repos = "https://cran.r-project.org")
+library(agricolae)
+# Create two empty vectors to add results
+Feature_ID <- c()
+tk_group_early <- c()
+tk_group_late <- c()
+tk_group_medium <- c()
+# Batch analysis
+for(i in 3:80) {
+  tk_model <- aov(tk_height[, i] ~ tk_height$Age_factor, data = tk_height)
+  tk_tes <- HSD.test(tk_model, "tk_height$Age_factor", group = TRUE)
+  tk_group_early <- c(tk_group_early, tk_tes[["groups"]]["Early",2])
+  tk_group_late <- c(tk_group_late, tk_tes[["groups"]]["Late",2])
+  tk_group_medium <- c(tk_group_medium, tk_tes[["groups"]]["Medium",2])
+  Feature_ID <- c(Feature_ID, names(tk_height[i]))
+  tk_res <- data.frame(Feature_ID, tk_group_early, tk_group_late,
+                       tk_group_medium)
+  tk_res
+}
+
+```
+
+Merge all results and add a flag in the Tukey result column: "-" for metabolites with Unequal variance according to the Bartlett test and "ns" for metabolites not significant according to the ANOVA test.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Merge all results obtained in the Tukey test
+tk_result <- left_join(tk_bar_res, tk_anova_res)
+tk_result <- left_join(tk_result, tk_res)
+# Flag "-" metabolites that has unequal variance
+for(i in 1:78) {
+  if (tk_result$bartlett_group[i] == "Unequal variance") {
+		tk_result$tk_group_early[i] <- "-"
+		tk_result$tk_group_medium[i] <- "-"
+		tk_result$tk_group_late[i] <- "-"
+  }
+  if (tk_result$anova_group[i] == "Not Significant" &
+      tk_result$bartlett_group[i] == "equal variance") {
+		tk_result$tk_group_early[i] <- "ns"
+		tk_result$tk_group_medium[i] <- "ns"
+		tk_result$tk_group_late[i] <- "ns"
+}
+ tk_result
+}
+
+```
+
+Creating a Tukey result table to use in the heatmap ([multivariate statistics notebook](https://doi.org/10.3390/metabo10040135)).
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Tukey table to heatmap
+hm_tk_table <- data.frame(Feature_ID = tk_result$Feature_ID,
+                          Early = tk_result$tk_group_early,
+                          Late = tk_result$tk_group_late,
+                          Medium = tk_result$tk_group_medium)
+
+```
+
+Print Tukey results in a table.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# The "gt" package installation
+#install.packages("gt")
+library(gt)
+# Adding metabolite name
+tk_table <- left_join(tk_fdata, hm_tk_table)
+# Deleting the Feature_ID column
+tk_table <- subset(tk_table, select = -c(Feature_ID) )
+tk_table %>%
+  gt()%>% 
+  tab_spanner(
+    label = "Tukey test",
+    columns = 2:4)%>%
+  tab_source_note(source_note = "Note: Different lowercase letter within the same row indicates significant differences based on Tukey's multiple comparisons (p-value < 0.05, n = 3). '-' represents features with unequal variance according to Bartlett's test. 'ns' are the features that do not have statistical differences (p-value > 0.05) according to the ANOVA test.")
+
+```
 
 ## Sample
 
-XXXX
+Sample data extraction for Tukey test calculation.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Drop factor pooled (subQC)
+tk_no_subqc <- tk_no_qc[, tk_no_qc$Analysis_group != "Sub_Quality_Control"]
+pData(tk_no_subqc) <- droplevels(pData(tk_no_subqc))
+# Extracting identified metabolites
+tk_no_subqc <- tk_no_subqc[!is.na(tk_no_subqc@featureData@data$Metabolite),]
+
+```
+
+Preparing data and metadata for Tukey test calculation.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Extracting feature height table
+tk_spl_height <- exprs(tk_no_subqc)
+# Extracting sample information
+tk_spl_pdata <- tk_no_subqc@phenoData@data
+tk_spl_pdata <- data.frame(Sample_ID = tk_spl_pdata$Sample_ID,
+                           Age_factor = tk_spl_pdata$Age_factor)
+# Extracting feature information
+tk_spl_fdata <- tk_no_subqc@featureData@data
+tk_spl_fdata <- data.frame(Feature_ID = tk_spl_fdata$Feature_ID,
+                           Metabolite = tk_spl_fdata$Metabolite)
+# Transposing feature height table
+tk_spl_height <- t(tk_spl_height)
+# Feature height table to dataframe
+tk_spl_height <- as.data.frame(tk_spl_height)
+# Convert the row names to sample ID
+tk_spl_height <- tk_spl_height %>% 
+  mutate(Sample_ID = rownames(tk_spl_height))
+# Adding age factor as variable
+tk_spl_height <- left_join(tk_spl_pdata, tk_spl_height)
+
+```
+
+The data is ready to test the data homoscedasticity. The Bartlett test was used to inspect the homogeneity of variance.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Create two empty vectors to add results
+Feature_ID <- c()
+bartlett_pValue <- c()
+# Batch analysis
+for(i in 3:80) {
+  bar_res <- bartlett.test(tk_spl_height[, i] ~ tk_spl_height$Age_factor,
+                           data = tk_spl_height)
+  bartlett_pValue <- c(bartlett_pValue, bar_res[["p.value"]])
+  Feature_ID <- c(Feature_ID, names(tk_spl_height[i]))
+  tk_spl_bar_res <- data.frame(Feature_ID, bartlett_pValue)
+}
+# Adding a description of the p-value
+tk_spl_bar_res <- tk_spl_bar_res %>%
+  mutate(bartlett_group = ifelse(bartlett_pValue > 0.05,
+                                 "equal variance",
+                                 "Unequal variance"))
+
+```
+
+Some metabolites showed equality of variances according to the Bartlett test. The next step will be the ANOVA test.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Create two empty vectors to add results
+Feature_ID <- c()
+anova_pValue <- c()
+# Batch analysis
+for(i in 3:80) {
+  anova_model <- glm(tk_spl_height[, i] ~ tk_spl_height$Age_factor,
+                     data = tk_spl_height)
+  anova_res <- anova(anova_model, test = "LRT")
+  anova_pValue <- c(anova_pValue, anova_res$`Pr(>Chi)`[2])
+  Feature_ID <- c(Feature_ID, names(tk_spl_height[i]))
+  tk_spl_anova_res <- data.frame(Feature_ID, anova_pValue)
+}
+# Adding a description of the p-value
+tk_spl_anova_res <- tk_spl_anova_res %>%
+  mutate(anova_group = ifelse(anova_pValue > 0.05,
+                              "Not Significant",
+                              "Significant"))
+
+```
+
+Consequently, the features with significance (p-value < 0.05) according to ANOVA were used for the Tukey test. Tukey test groups the different variables (in this case, the levels of age factor: early, medium, and late) using significance tests.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Create two empty vectors to add results
+Feature_ID <- c()
+tk_group_early <- c()
+tk_group_late <- c()
+tk_group_medium <- c()
+# Batch analysis
+for(i in 3:80) {
+  tk_model <- aov(tk_spl_height[, i] ~ tk_spl_height$Age_factor,
+                  data = tk_spl_height)
+  tk_tes <- HSD.test(tk_model, "tk_spl_height$Age_factor", group = TRUE)
+  tk_group_early <- c(tk_group_early, tk_tes[["groups"]]["Early",2])
+  tk_group_late <- c(tk_group_late, tk_tes[["groups"]]["Late",2])
+  tk_group_medium <- c(tk_group_medium, tk_tes[["groups"]]["Medium",2])
+  Feature_ID <- c(Feature_ID, names(tk_spl_height[i]))
+  tk_spl_res <- data.frame(Feature_ID, tk_group_early, tk_group_late,
+                       tk_group_medium)
+  tk_spl_res
+}
+
+```
+
+Merge all results and add a flag in the Tukey result column: "-" for metabolites with Unequal variance according to the Bartlett test and "ns" for metabolites not significant according to the ANOVA test.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Merge all results obtained in the Tukey test
+tk_spl_result <- left_join(tk_spl_bar_res, tk_spl_anova_res)
+tk_spl_result <- left_join(tk_spl_result, tk_spl_res)
+# Flag "-" metabolites that has unequal variance
+for(i in 1:78) {
+  if (tk_spl_result$bartlett_group[i] == "Unequal variance") {
+		tk_spl_result$tk_group_early[i] <- "-"
+		tk_spl_result$tk_group_medium[i] <- "-"
+		tk_spl_result$tk_group_late[i] <- "-"
+  }
+  if (tk_spl_result$anova_group[i] == "Not Significant" &
+      tk_spl_result$bartlett_group[i] == "equal variance") {
+		tk_spl_result$tk_group_early[i] <- "ns"
+		tk_spl_result$tk_group_medium[i] <- "ns"
+		tk_spl_result$tk_group_late[i] <- "ns"
+}
+ tk_spl_result
+}
+
+```
+
+Creating a Tukey result table to use in the heatmap ([multivariate statistics notebook](https://doi.org/10.3390/metabo10040135)).
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Tukey table to heatmap
+hm_tk_table <- data.frame(Feature_ID = tk_group$Feature_ID,
+                          Early = tk_group$tk_group_early,
+                          Late = tk_group$tk_group_late,
+                          Medium = tk_group$tk_group_medium)
+# Replacing NAs by "ns" (not Significant)
+hm_tk_table[is.na(hm_tk_table)]  <- "ns"
+
+```
+
+
+
+
 
 
 

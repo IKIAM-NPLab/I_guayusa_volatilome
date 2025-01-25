@@ -975,32 +975,15 @@ Classification_List
 
 ## Heatmap of age
 
-Scaling by  Auto-Scaling method and age factor data extraction.
+Scaling glog data by  Auto-Scaling method and age factor data extraction.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-
-
-
-
-# Convert feature height table to SummarizedExperiment class
-hm_pmp <- SummarizedExperiment(assays = pca_peakheight,
-                               colData = pca_phenodata)
-# Generalised logarithmic transform
-hm_glog <- glog_transformation(df = hm_pmp@assays@data@listData[[1]],
-                               classes = hm_pmp$QC,
-                               qc_label = "QC")
-
-
-
 # Scaling by autoscaling method
-hm_scl <- scale(t(hm_glog), center = TRUE, scale = TRUE)
+hm_scl <- scale(t(glog_exprs), center = TRUE, scale = TRUE)
 hm_scl <- t(hm_scl)
-
-
-
 # Adding autoscaling data to notame MetaboSet
-hm_scl_set <- no_flag
+hm_scl_set <- ppm_noflag
 exprs(hm_scl_set) <- hm_scl
 # Drop QC
 hm_no_qc <- drop_qcs(hm_scl_set)
@@ -1012,6 +995,13 @@ hm_age <- hm_no_sample[, hm_no_sample$Age_factor != "Other factor"]
 pData(hm_age) <- droplevels(pData(hm_age))
 # Extracting identified metabolites
 hm_age_set <- hm_age[!is.na(hm_age@featureData@data$Metabolite),]
+
+```
+
+We improve heatmap visualization by adding the Tukey test as row annotation. The code of the Tukey test calculation is available in the ["univariate statistics notebook](https://doi.org/10.3390/metabo10040135).
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
 # Adding tukey test result
 hm_age_set <- join_fData(hm_age_set, hm_tk_table)
 
@@ -1117,17 +1107,17 @@ lgd1 <- Legend(col_fun = mycol,
 lgd2 <- Legend(labels = c("Light",
                           "Shade"),
                legend_gp = gpar(fill = cols_light),
-               title = "Light level", ncol = 1)
+               title = "Light factor", ncol = 1)
 lgd3 <- Legend(labels = c("Early (0)",
                           "Medium (1)",
                           "Late (2)"),
                legend_gp = gpar(fill = cols_age),
-               title = "Age level", ncol = 1)
+               title = "Age factor", ncol = 1)
 lgd4 <- Legend(labels = c("Alto Pano",
                           "Alto Tena",
                           "Talag"),
                legend_gp = gpar(fill = cols_location),
-               title = "Location level", ncol = 1)
+               title = "Location factor", ncol = 1)
 # Metabolite class Legend
 lgd5 <- Legend(labels = c(unique(hm_fdata$classyfireR_Superclass)),
                legend_gp = gpar(fill = cols_metclass),
@@ -1167,28 +1157,55 @@ gcms_hm
 
 ## Heatmap of sample
 
-Extracting sample data.
+Using the scaled data of the age heatmap, we extract sample data of identified metabolites.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 # Drop subQC
-hm1_no_subqc <- hm_no_qc[, hm_no_qc$Analysis_group != "Sub_Quality_Control"]
+hm_no_subqc <- hm_no_qc[, hm_no_qc$Analysis_group != "Sub_Quality_Control"]
+pData(hm_no_subqc) <- droplevels(pData(hm_no_subqc))
+# Extracting identified metabolites
+hm_age_spl <- hm_no_subqc[!is.na(hm_no_subqc@featureData@data$Metabolite),]
 
 ```
 
-Scaling, row and top heatmap anotation.
+We improve heatmap visualization by adding the Tukey test as row annotation. The code of the Tukey test calculation is available in the ["univariate statistics notebook](https://doi.org/10.3390/metabo10040135).
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Adding tukey test result
+hm_age_spl <- join_fData(hm_age_spl, tk_spl_result)
+
+```
+
+Row and top heatmap annotation.
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, fig.width = 14, fig.height = 13}
 
 set.seed(2571)
 # Extracting feature height table
-hm1_height <- exprs(hm1_no_subqc)
+hm_height_spl <- exprs(hm_age_spl)
 # Extracting sample information
-hm1_pdata <- hm1_no_subqc@phenoData@data
+hm_pdata_spl <- hm_age_spl@phenoData@data
+# Extracting feature information
+hm_fdata_spl <- hm_age_spl@featureData@data
 # Adding row and column name
-rownames(hm1_height) <- hm_fdata$Metabolite
-colnames(hm1_height) <- hm1_pdata$Group
+rownames(hm_height_spl) <- hm_fdata_spl$Metabolite
+colnames(hm_height_spl) <- hm_pdata_spl$Group
+# Add row anotation to HeatMap
+hm_row_ann <- rowAnnotation(`Superclass` = hm_fdata_spl$classyfireR_Superclass,
+                            col = list(`Superclass` = cols_metclass),
+                            show_annotation_name = T,
+                            show_legend = F)
 # Factor levels color
+cols_levels <- c("Shade" = "#32373AFF",
+                 "Early" = "#E76BF3",
+                 "Light" = "#F5BC5CFF",
+                 "Late" = "#F8766D",
+                 "Talag" = "#4457A5FF",
+                 "Medium" = "#00B0F6",
+                 "Alto Tena" = "#4F9D4EFF",
+                 "Alto Pano" = "#B24422FF")
 cols_light <- c("Light" = "#F5BC5CFF",
                 "Shade" = "#32373AFF")
 cols_age <- c("Early" = "#E76BF3",
@@ -1198,31 +1215,32 @@ cols_location <- c("Alto Pano" = "#B24422FF",
                    "Alto Tena" = "#4F9D4EFF",
                    "Talag" = "#4457A5FF")
 # Add top anotation to HeatMap
-top_info_ann1 <- HeatmapAnnotation(`Light level` = hm1_pdata$Light_factor,
-                                   `Age level` = hm1_pdata$Age_factor,
-                                   `Location level` = hm1_pdata$Location_factor,
-                                   col = list(`Light level` = cols_light,
-                                              `Age level` = cols_age,
-                                              `Location level` = cols_location),
-                                   show_annotation_name = T,
-                                   show_legend=F,
-                                   border = TRUE)
+top_info_ann <- HeatmapAnnotation(`Light factor` = hm_pdata_spl$Light_factor,
+                                  `Age factor` = hm_pdata_spl$Age_factor,
+                                  `Location factor` = hm_pdata_spl$Location_factor,
+                                  col = list(`Light factor` = cols_light,
+                                             `Age factor` = cols_age,
+                                             `Location factor` = cols_location),
+                                  show_annotation_name = T,
+                                  show_legend=F, 
+                                  border = TRUE)
 # Color scale
-mycol1 <- colorRamp2(c(-4, 0, 4),
-                     c("blue", "white", "red"))
+mycol_spl <- colorRamp2(c(-4, 0, 4),
+                    c("blue", "white", "red"))
 # Heatmap matrix plotting
-hm1_plot <- Heatmap(hm1_height,
-                    col = mycol1,
-                    border_gp = grid::gpar(col = "black", lty = 0.05),
-                    rect_gp = grid::gpar(col = "black", lwd = 0.75),
-                    clustering_distance_columns = "euclidean",
-                    clustering_method_columns = "complete",
-                    top_annotation = top_info_ann1,
-                    right_annotation = hm_row_ann,
-                    row_names_max_width = unit(10, "cm"),
-                    show_heatmap_legend = FALSE,
-                    row_km = 3, column_km = 3)
-hm1_plot
+hm_plot_spl <- Heatmap(hm_height_spl,
+                       col = mycol,
+                       border_gp = grid::gpar(col = "black", lty = 0.05),
+                       rect_gp = grid::gpar(col = "black", lwd = 0.75),
+                       clustering_distance_columns = "euclidean",
+                       clustering_method_columns = "complete",
+                       top_annotation = top_info_ann,
+                       right_annotation = hm_row_ann,
+                       row_names_max_width = unit(10, "cm"),
+                       show_heatmap_legend = FALSE,
+                       row_km = 3, column_km = 2,
+                       row_title = c("a", "b", "c"))
+hm_plot_spl
 
 ```
 
@@ -1231,38 +1249,38 @@ Adding legends to heatmap.
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 # Color scale legend
-lgd1_1hm <- Legend(col_fun = mycol1,
-                   title = "glog abundance",
-                   direction = "horizontal" )
+lgd_hm_spl <- Legend(col_fun = mycol_spl,
+                     title = "glog abundance",
+                     direction = "horizontal" )
 
 ```
 
-ComplexHeatmap plot
+Heatmap plot.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, fig.width = 14, fig.height = 13}
 
-set.seed(2548)
+set.seed(2571)
 # Converting to ggplot
-gg_heatmap1 <- grid.grabExpr(draw(hm1_plot))
-gg_heatmap1 <- ggpubr::as_ggplot(gg_heatmap1)
+gg_heatmap_spl <- grid.grabExpr(draw(hm_plot_spl))
+gg_heatmap_spl <- ggpubr::as_ggplot(gg_heatmap_spl)
 # Legends
-all_legends1 <- packLegend(lgd1_1hm,
+all_legends_spl <- packLegend(lgd_hm_spl,
                            lgd2,
                            lgd3, 
                            lgd4, 
                            lgd5,
                            direction = "horizontal")
-gg_legend1 <- grid.grabExpr(draw(all_legends1))
-gg_legend_fn1 <- ggpubr::as_ggplot(gg_legend1)
+gg_legend_spl <- grid.grabExpr(draw(all_legends_spl))
+gg_legend_fn_spl <- ggpubr::as_ggplot(gg_legend_spl)
 # Heatmap plot
-gcms_hm1 <- plot_grid(gg_legend_fn1,
-                     gg_heatmap1, ncol = 1,
+gcms_hm_spl <- plot_grid(gg_legend_fn_spl,
+                     gg_heatmap_spl, ncol = 1,
                      rel_heights = c(0.045, 0.880))
-gcms_hm1
+gcms_hm_spl
 # Save heatmap plot
-ggsave(filename = "Result/notame_Result/Figure_S4.pdf", plot = gcms_hm1,
+ggsave(filename = "Result/notame_Result/Figure_S4.pdf", plot = gcms_hm_spl,
        width = 8, height = 10, units = "in", dpi = 300, scale = 1.7)
-ggsave(filename = "Result/notame_Result/Figure_s4.png", plot = gcms_hm1,
+ggsave(filename = "Result/notame_Result/Figure_s4.png", plot = gcms_hm_spl,
        width = 8, height = 10, units = "in", dpi = 300, scale = 1.7)
 
 ```
@@ -1291,11 +1309,11 @@ figure_one <- ggpubr::as_ggplot(figure_1) +
                   x = c(0, 0.332, 0.665, 0),
                   y = c(.99, .99, .99, .656))
 # Exporting (*.pdf) file
-ggsave(filename = "Result/notame_Result/figure_1_glog.pdf", plot = figure_one,
-      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
+#ggsave(filename = "Result/notame_Result/figure_1_glog.pdf", plot = figure_one,
+#      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
 # Exporting (*.png) file
-ggsave(filename = "Result/notame_Result/figure_1_glog.png", plot = figure_one,
-      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
+#ggsave(filename = "Result/notame_Result/figure_1_glog.png", plot = figure_one,
+#      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
 # Exporting (*.jpg) file
 #ggsave(filename = "Result/notame_Result/figure_1_glog.jpg", plot = figure_one,
 #      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
@@ -1434,11 +1452,11 @@ figure_two <- ggpubr::as_ggplot(figure_2) +
                   x = c(0, 0.5),
                   y = c(.99, .99))
 # Exporting (*.pdf) file
-ggsave(filename = "Result/notame_Result/figure_2.pdf", plot = figure_two,
-      width = 175, height = 155, units = "mm", dpi = 300, scale = 2.5)
+#ggsave(filename = "Result/notame_Result/figure_2.pdf", plot = figure_two,
+#      width = 175, height = 155, units = "mm", dpi = 300, scale = 2.5)
 # Exporting (*.png) file
-ggsave(filename = "Result/notame_Result/figure_2.png", plot = figure_two,
-      width = 175, height = 155, units = "mm", dpi = 300, scale = 2.5)
+#ggsave(filename = "Result/notame_Result/figure_2.png", plot = figure_two,
+#      width = 175, height = 155, units = "mm", dpi = 300, scale = 2.5)
 # Exporting (*.jpg) file
 #ggsave(filename = "Result/notame_Result/figure_2.jpg", plot = figure_two,
 #      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
