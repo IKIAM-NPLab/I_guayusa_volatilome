@@ -773,7 +773,8 @@ tk_table <- tk_table |>
                   multiple comparisons (p-value < 0.05, n = 3). '-' represents 
                   features with unequal variance according to Levene's test. 
                   'ns' are the features that do not have statistical 
-                  differences (p-value > 0.05) according to the ANOVA test.")
+                  differences (p-value > 0.05) according to the ANOVA test.") |>
+  tab_options(table.width = px(750))
 tk_table
 
 
