@@ -759,7 +759,7 @@ library(gt)
 tk_table <- left_join(tk_fdata, hm_tk_table)
 # Deleting the Feature_ID column
 tk_table <- subset(tk_table, select = -c(Feature_ID) )
-tk_table %>%
+tk_table <- tk_table %>%
   gt()%>% 
   tab_spanner(
     label = "Tukey test",
@@ -770,6 +770,7 @@ tk_table %>%
                   features with unequal variance according to Levene's test. 
                   'ns' are the features that do not have statistical 
                   differences (p-value > 0.05) according to the ANOVA test.")
+tk_table
 
 ```
 
@@ -923,7 +924,7 @@ Print Tukey results in a table.
 tk_table_spl <- left_join(tk_fdata, hm_tk_table_spl)
 # Deleting the Feature_ID column
 tk_table_spl <- subset(tk_table_spl, select = -c(Feature_ID) )
-tk_table_spl %>%
+tk_table_spl <- tk_table_spl %>%
   gt()%>% 
   tab_spanner(
     label = "Tukey test",
@@ -934,6 +935,7 @@ tk_table_spl %>%
                   features with unequal variance according to Levene's test. 
                   'ns' are the features that do not have statistical 
                   differences (p-value > 0.05) according to the ANOVA test.")
+tk_table_spl
 
 ```
 
