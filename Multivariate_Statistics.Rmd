@@ -760,10 +760,14 @@ tk_table <- left_join(tk_fdata, hm_tk_table)
 # Deleting the Feature_ID column
 tk_table <- subset(tk_table, select = -c(Feature_ID) )
 tk_table <- tk_table |>
-  gt()|>
+  gt() |>
+  fmt_markdown(
+  columns = everything(),
+  rows = everything(),
+  md_engine = c("markdown", "commonmark")) |>
   tab_spanner(
     label = "Tukey test",
-    columns = 2:4)|>
+    columns = 2:4) |>
     tab_source_note(source_note = "Note: Different lowercase letter within the 
                   same row indicates significant differences based on Tukey's 
                   multiple comparisons (p-value < 0.05, n = 3). '-' represents 
@@ -771,6 +775,11 @@ tk_table <- tk_table |>
                   'ns' are the features that do not have statistical 
                   differences (p-value > 0.05) according to the ANOVA test.")
 tk_table
+
+
+
+
+
 
 ```
 
