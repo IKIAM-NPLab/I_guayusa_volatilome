@@ -750,7 +750,7 @@ hm_tk_table <- data.frame(Feature_ID = tk_result$Feature_ID,
 
 Print Tukey results in a table.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, background=FALSE}
 
 # The "gt" package installation
 #install.packages("gt")
