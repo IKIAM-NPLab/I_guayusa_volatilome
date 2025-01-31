@@ -1,5 +1,5 @@
 ---
-title: "Effect of age and light on the volatile profile of *Ilex guayusa* leaves - Multivariate statistical analysis"
+title: "Effect of age and light on the volatile profile of *Ilex guayusa* leaves - Statistics analysis"
 author: "Jefferson Pastuña"
 date: "2024-04-17"
 output:
@@ -319,7 +319,7 @@ Finally, the data is ready to be exported and proceed with the statistical analy
 
 ## Volcano plot
 
-The generalized logarithm (glog) transformed data, and the probabilistic quotient normalization (PQN) data were used for volcano plot analysis. The two-sample t-test method (was calculated using glog transformed data) was used for the "y" axis of the volcano plot, and fold change (was calculated using PQN normalized data) was used for the "x" axis. We plotted two volcanoes, one with SubQC data and the other with individual data.
+The volcano plot was implemented to support the multivariate statistic by analyzing individual features between levels of light factor (light and shade). The generalized logarithm (glog) transformed data, and the probabilistic quotient normalization (PQN) data were used for volcano plot analysis. The glog-transformed data was used for the two-sample t-test and Welch's t-test calculation. The two-sample t-test (for features with equal variances) and Welch's t-test (for features with unequal variances) methods were used for the "y" axis of the volcano plot, and fold change (calculated using PQN normalized data) was used for the "x" axis. We plotted two volcanoes, one with SubQC data and the other with individual data.
 
 The first step was data extraction.
 
@@ -355,7 +355,18 @@ pData(volc_pqn) <- droplevels(pData(volc_pqn))
 
 ```
 
-Calculation of t-test and fold change.
+Before the t-test calculation, the features homoscedasticity was tested using Levene's test. For features with equal variance, the Student's t-test was implemented, and for features with unequal variance, Welch's t-test was implemented.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Performing homoscedasticity test
+volc_th <-
+  perform_homoscedasticity_tests(volc_glog,
+                                 formula_char = "Feature ~ Light_factor")
+
+```
+
+According to Levene's test, all features showed an equal variance (p-value > 0.05). Thus, the t-test and fold change will be calculated.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
@@ -364,7 +375,9 @@ library(dplyr)
 # Fold change between shade and light levels
 volc_fc <- fold_change(volc_pqn, group = "Light_factor")
 # two-sample t-test performing
-volc_t <- perform_t_test(volc_glog, formula_char = "Feature ~ Light_factor")
+volc_t <- perform_t_test(volc_glog,
+                         formula_char = "Feature ~ Light_factor",
+                         var.equal = TRUE)
 # Adding the fold change to the t-test data
 volc_data <- left_join(volc_t, volc_fc)
 # Log-transform for visualization
@@ -463,16 +476,50 @@ sp_volc_pqn <- drop_qcs(sp_volc_pqn)
 
 ```
 
-Calculation of t-test and fold change.
+Before the t-test calculation, the features homoscedasticity was tested using Levene's test. For features with equal variance, the Student's t-test was implemented, and for features with unequal variance, Welch's t-test was implemented.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
+# Performing homoscedasticity test
+sp_volc_th <-
+  perform_homoscedasticity_tests(sp_volc_glog,
+                                 formula_char = "Feature ~ Light_factor")
+# Adding homoscedasticity results to notame MetaboSet
+sp_volc_glog <- join_fData(sp_volc_glog, sp_volc_th)
+# Extracting features with equal variance
+sp_volc_ttset <-
+  sp_volc_glog[sp_volc_glog@featureData@data$Levene_P > 0.05,]
+# Extracting features with unequal variance
+sp_volc_wttset <-
+  sp_volc_glog[sp_volc_glog@featureData@data$Levene_P < 0.05,]
+
+```
+
+Calculation of t-test, Welch's t-test and fold change.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 # Fold change between shade and light levels
 sp_volc_fc <- fold_change(sp_volc_pqn, group = "Light_factor")
-# two-sample t-test performing
-sp_volc_t <- perform_t_test(sp_volc_glog,
-                            formula_char = "Feature ~ Light_factor")
-# Adding the fold change to the t-test data
+# The two-sample t-test performing
+sp_volc_tt <- perform_t_test(sp_volc_ttset,
+                            formula_char = "Feature ~ Light_factor",
+                            var.equal = TRUE)
+# Adding a tag for t-test results
+sp_volc_tt <- sp_volc_tt %>%
+  mutate(Statistic_test = case_when(
+    Feature_ID != 0 ~ "Student's t-test"))
+# The Welch's t-test performing
+sp_volc_wtt <- perform_t_test(sp_volc_wttset,
+                            formula_char = "Feature ~ Light_factor",
+                            var.equal = TRUE)
+# Adding a tag for Welch's t-test results
+sp_volc_wtt <- sp_volc_wtt %>%
+  mutate(Statistic_test = case_when(
+    Feature_ID != 0 ~ "Welch's t-test"))
+# Merge Welch's t-test and Student's t-test
+sp_volc_t <- rbind(sp_volc_tt, sp_volc_wtt)
+# Adding the fold change to statistical results
 sp_volc_data <- left_join(sp_volc_t, sp_volc_fc)
 # Log-transform for visualization
 sp_volc_data$logP <- -log10(sp_volc_data$Light_vs_Shade_t_test_P)
@@ -482,7 +529,7 @@ sp_volc_data$log2_fc <- log2(sp_volc_data$Shade_vs_Light_FC)
 
 Volcano plot of Sample.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, fig.width = 9, fig.height = 15}
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, fig.width = 9.5, fig.height = 9}
 
 # Determine point colors based on significance and fold change
 sp_volc_data <- sp_volc_data %>%
@@ -498,19 +545,20 @@ sp_volc_compouds <- subset(sp_volc_data, Light_vs_Shade_t_test_P < 0.05 |
                              point_color == "Fold change")
 sp_volc_compouds <- left_join(meta_table, sp_volc_compouds)
 # Volcano plot
-sp_vc_plot <- ggplot(sp_volc_data, aes(log2_fc, logP, color = point_color)) +
-  geom_point(size = 2, alpha = 0.4) +
+sp_vc_plot <- ggplot(sp_volc_data, aes(log2_fc, logP)) +
+  #geom_point(size = 2, alpha = 0.4) +
   scale_colour_manual(values = c("No fold change" = "#808080",
                                  "Down" = "#4F9D4EFF",
                                  "Up" = "#ff80ff",
                                  "Fold change" = "#F5BC5CFF")) +
   theme_classic() +
   #theme(legend.position = "none") +
-  #geom_point(data = volc_compouds,
-  #           aes(shape = meta_table$Identification_level,
-  #               color = meta_table$Identification_level),
-  #           size = 2) +
-  labs(#shape = 'Identification level',
+  geom_point(data = sp_volc_data,
+             aes(shape = Statistic_test,
+                 color = point_color),
+             size = 2.5,
+             alpha = 0.4) +
+  labs(shape = 'Statistical test',
        color = 'Color key') +
   ggrepel::geom_label_repel(data = sp_volc_compouds,
                             aes(label = meta_table$Metabolite),
@@ -521,11 +569,11 @@ sp_vc_plot <- ggplot(sp_volc_data, aes(log2_fc, logP, color = point_color)) +
                             cex = 2.5,
                             max.overlaps = 20,
                             min.segment.length = 0,
-                            seed = 42,) +
+                            seed = 42) +
   xlab(bquote(Log[2](Shade/Light))) + ylab(bquote(-Log[10](p-value))) +
   scale_y_continuous(limits = c(0,4), labels = function(i) 10^-i,
                      expand=c(0.003, 0.003)) +
-  theme(legend.position = c(0.90, 0.947),
+  theme(legend.position = c(0.915, 0.85),
         legend.background = element_rect(fill = "white", color = "black")) +
   theme(panel.grid = element_blank(),
         panel.border = element_rect(fill= "transparent")) +
@@ -535,14 +583,16 @@ sp_vc_plot <- ggplot(sp_volc_data, aes(log2_fc, logP, color = point_color)) +
   geom_hline(yintercept = -log10(0.05), linetype = "longdash", colour="gray")
 sp_vc_plot
 # Save plot
-#ggsave('Result/notame_Result/figure_2b.pdf',
-#       width = 5, height = 4, device='pdf', dpi="print")
+#ggsave(filename = "Result/notame_Result/Figure_s5.pdf", plot = sp_vc_plot,
+#       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
+#ggsave(filename = "Result/notame_Result/Figure_s5.png", plot = sp_vc_plot,
+#       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
 
 ```
 
 ## Tukey test
 
-The tukey test was implemented to support the multivariate statistic by analyzing individual identified metabolites between age factors (with three levels: early, medium, and late). Only metabolites with data homoscedasticity were considered for the ANOVA test, and metabolites with significance (p-value < 0.05) were used for the Tukey test. The generalized logarithm (glog) transformed data was used for the Tukey test.
+The tukey test was implemented to support the multivariate statistic by analyzing individual identified metabolites between levels of age factor (early, medium, and late). Only metabolites with data homoscedasticity were considered for the ANOVA test, and metabolites with significance (p-value < 0.05) were used for the Tukey test. The generalized logarithm (glog) transformed data was used for the Tukey test.
 
 Previously, we tested with the auto-scaled data and found that seven metabolites did not satisfy the data homoscedasticity according to the Bartlett test. On the other hand, when we tested with the glog-transformed data, only two metabolites did not satisfy the data homoscedasticity. For the above reasons, we used log-transformed data for the Tukey test.
 
@@ -593,26 +643,19 @@ tk_height <- left_join(tk_pdata, tk_height)
 
 ```
 
-The data is ready to test the data homoscedasticity. The Bartlett test was used to inspect the homogeneity of variance.
+The data is ready to test the data homoscedasticity. The Levene's test was used to inspect the homogeneity of variance.
 
 ```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
-# Create two empty vectors to add results
-Feature_ID <- c()
-bartlett_pValue <- c()
-# Batch analysis
-for(i in 3:80) {
-  bar_res <- bartlett.test(tk_height[, i] ~ tk_height$Age_factor,
-                           data = tk_height)
-  bartlett_pValue <- c(bartlett_pValue, bar_res[["p.value"]])
-  Feature_ID <- c(Feature_ID, names(tk_height[i]))
-  tk_bar_res <- data.frame(Feature_ID, bartlett_pValue)
-}
+# Performing homoscedasticity test
+tk_bar_res <-
+  perform_homoscedasticity_tests(tk_age_set,
+                                 formula_char = "Feature ~ Age_factor")
 # Adding a description of the p-value
 tk_bar_res <- tk_bar_res %>%
-  mutate(bartlett_group = ifelse(bartlett_pValue > 0.05,
+  mutate(bartlett_group = ifelse(Levene_P > 0.05,
                                  "equal variance",
-                                 "Unequal variance"))
+                                 "unequal variance"))
 
 ```
 
@@ -676,7 +719,7 @@ tk_result <- left_join(tk_result, tk_res)
 # Flag metabolites
 for(i in 1:78) {
   # Flag "-" metabolites that has unequal variance
-  if (tk_result$bartlett_group[i] == "Unequal variance") {
+  if (tk_result$bartlett_group[i] == "unequal variance") {
 		tk_result$tk_group_early[i] <- "-"
 		tk_result$tk_group_medium[i] <- "-"
 		tk_result$tk_group_late[i] <- "-"
@@ -724,7 +767,7 @@ tk_table %>%
   tab_source_note(source_note = "Note: Different lowercase letter within the 
                   same row indicates significant differences based on Tukey's 
                   multiple comparisons (p-value < 0.05, n = 3). '-' represents 
-                  features with unequal variance according to Bartlett's test. 
+                  features with unequal variance according to Levene's test. 
                   'ns' are the features that do not have statistical 
                   differences (p-value > 0.05) according to the ANOVA test.")
 
@@ -770,26 +813,19 @@ tk_spl_height <- left_join(tk_spl_pdata, tk_spl_height)
 
 ```
 
-The data is ready to test the data homoscedasticity. The Bartlett test was used to inspect the homogeneity of variance.
+The data is ready to test the data homoscedasticity. The Levene's test was used to inspect the homogeneity of variance.
 
 ```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
-# Create two empty vectors to add results
-Feature_ID <- c()
-bartlett_pValue <- c()
-# Batch analysis
-for(i in 3:80) {
-  bar_res <- bartlett.test(tk_spl_height[, i] ~ tk_spl_height$Age_factor,
-                           data = tk_spl_height)
-  bartlett_pValue <- c(bartlett_pValue, bar_res[["p.value"]])
-  Feature_ID <- c(Feature_ID, names(tk_spl_height[i]))
-  tk_spl_bar_res <- data.frame(Feature_ID, bartlett_pValue)
-}
+# Performing homoscedasticity test
+tk_spl_bar_res <-
+  perform_homoscedasticity_tests(tk_no_subqc,
+                                 formula_char = "Feature ~ Age_factor")
 # Adding a description of the p-value
 tk_spl_bar_res <- tk_spl_bar_res %>%
-  mutate(bartlett_group = ifelse(bartlett_pValue > 0.05,
+  mutate(bartlett_group = ifelse(Levene_P > 0.05,
                                  "equal variance",
-                                 "Unequal variance"))
+                                 "unequal variance"))
 
 ```
 
@@ -851,7 +887,7 @@ tk_spl_result <- left_join(tk_spl_bar_res, tk_spl_anova_res)
 tk_spl_result <- left_join(tk_spl_result, tk_spl_res)
 # Flag "-" metabolites that has unequal variance
 for(i in 1:78) {
-  if (tk_spl_result$bartlett_group[i] == "Unequal variance") {
+  if (tk_spl_result$bartlett_group[i] == "unequal variance") {
 		tk_spl_result$tk_group_early[i] <- "-"
 		tk_spl_result$tk_group_medium[i] <- "-"
 		tk_spl_result$tk_group_late[i] <- "-"
@@ -894,8 +930,8 @@ tk_table_spl %>%
     columns = 2:4)%>%
   tab_source_note(source_note = "Note: Different lowercase letter within the 
                   same row indicates significant differences based on Tukey's 
-                  multiple comparisons (p-value < 0.05, n = 3). '-' represents 
-                  features with unequal variance according to Bartlett's test. 
+                  multiple comparisons (p-value < 0.05, n = 18). '-' represents 
+                  features with unequal variance according to Levene's test. 
                   'ns' are the features that do not have statistical 
                   differences (p-value > 0.05) according to the ANOVA test.")
 
@@ -1688,8 +1724,8 @@ lgd1 <- Legend(col_fun = mycol,
                title = "glog abundance",
                direction = "horizontal" )
 # Factor levels legend
-lgd2 <- Legend(labels = c("Light (+)",
-                          "Shade (-)"),
+lgd2 <- Legend(labels = c("Light (Pos)",
+                          "Shade (Neg)"),
                legend_gp = gpar(fill = cols_light),
                title = "Light factor", ncol = 1)
 lgd3 <- Legend(labels = c("Early (0)",
@@ -1778,6 +1814,24 @@ rownames(hm_height_spl) <- hm_fdata_spl$Metabolite
 colnames(hm_height_spl) <- hm_pdata_spl$Group
 # Add row anotation to HeatMap
 hm_row_ann <- rowAnnotation(`Superclass` = hm_fdata_spl$classyfireR_Superclass,
+                            `Tukey test 2` = anno_text(hm_fdata_spl$Late,
+                                                       location = 0.5,
+                                                       just = "center",
+                                                       gp = gpar(fill = "#F8766D",
+                                                                 col = "#666666"),
+                                                       show_name = TRUE),
+                            `Tukey test 1` = anno_text(hm_fdata_spl$Medium,
+                                                       location = 0.5,
+                                                       just = "center",
+                                                       gp = gpar(fill = "#00B0F6",
+                                                                 col = "#666666"),
+                                                       show_name = TRUE),
+                            `Tukey test 0` = anno_text(hm_fdata_spl$Early,
+                                                       location = 0.5,
+                                                       just = "center",
+                                                       gp = gpar(fill = "#E76BF3",
+                                                                 col = "#666666"),
+                                                       show_name = TRUE),
                             col = list(`Superclass` = cols_metclass),
                             show_annotation_name = T,
                             show_legend = F)
@@ -1862,7 +1916,7 @@ gcms_hm_spl <- plot_grid(gg_legend_fn_spl,
                      rel_heights = c(0.045, 0.880))
 gcms_hm_spl
 # Save heatmap plot
-#ggsave(filename = "Result/notame_Result/Figure_S4.pdf", plot = gcms_hm_spl,
+#ggsave(filename = "Result/notame_Result/Figure_s4.pdf", plot = gcms_hm_spl,
 #       width = 8, height = 10, units = "in", dpi = 300, scale = 1.7)
 #ggsave(filename = "Result/notame_Result/Figure_s4.png", plot = gcms_hm_spl,
 #       width = 8, height = 10, units = "in", dpi = 300, scale = 1.7)
