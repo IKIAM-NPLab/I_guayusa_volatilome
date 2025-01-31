@@ -748,9 +748,9 @@ hm_tk_table <- data.frame(Feature_ID = tk_result$Feature_ID,
 
 ```
 
-Print Tukey results in a table.
+Formatting a table to show Tukey's result.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='asis'}
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
 
 # The "gt" package installation
 #install.packages("gt")
@@ -775,12 +775,14 @@ tk_table <- tk_table |>
                   'ns' are the features that do not have statistical 
                   differences (p-value > 0.05) according to the ANOVA test.") |>
   tab_options(table.width = px(750))
+
+```
+
+Print Tukey results in a table.
+
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
+
 tk_table
-
-
-
-
-
 
 ```
 
