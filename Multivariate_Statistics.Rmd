@@ -775,7 +775,7 @@ tk_table <- tk_table |>
                   'ns' are the features that do not have statistical 
                   differences (p-value > 0.05) according to the ANOVA test.") |>
   tab_options(table.width = px(750)) |>
-  as_latex()
+  as_raw_html()
 
 ```
 
