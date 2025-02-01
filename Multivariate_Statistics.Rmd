@@ -774,15 +774,16 @@ tk_table <- tk_table |>
                   features with unequal variance according to Levene's test. 
                   'ns' are the features that do not have statistical 
                   differences (p-value > 0.05) according to the ANOVA test.") |>
-  tab_options(table.width = px(750))
+  tab_options(table.width = px(750)) |>
+  as_latex()
 
 ```
 
 Print Tukey results in a table.
 
-```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE,cache.comments=FALSE}
+```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
-gt:::as.tags.gt_tbl(tk_table)
+tk_table
 
 ```
 
