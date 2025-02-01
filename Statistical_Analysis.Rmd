@@ -1,5 +1,5 @@
 ---
-title: "Effect of age and light on the volatile profile of *Ilex guayusa* leaves - Statistics analysis"
+title: "Effect of age and light on the volatile profile of *Ilex guayusa* leaves - Statistical analysis"
 author: "Jefferson Pastuña"
 date: "2024-04-17"
 output:
@@ -748,9 +748,9 @@ hm_tk_table <- data.frame(Feature_ID = tk_result$Feature_ID,
 
 ```
 
-Formatting a table to show Tukey's result.
+Print Tukey results in a table.
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+```{r echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 # The "gt" package installation
 #install.packages("gt")
@@ -776,13 +776,6 @@ tk_table <- tk_table |>
                   differences (p-value > 0.05) according to the ANOVA test.") |>
   tab_options(table.width = px(750)) |>
   as_raw_html()
-
-```
-
-Print Tukey results in a table.
-
-```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
-
 tk_table
 
 ```
@@ -937,17 +930,19 @@ Print Tukey results in a table.
 tk_table_spl <- left_join(tk_fdata, hm_tk_table_spl)
 # Deleting the Feature_ID column
 tk_table_spl <- subset(tk_table_spl, select = -c(Feature_ID) )
-tk_table_spl <- tk_table_spl %>%
-  gt()%>%
+tk_table_spl <- tk_table_spl |>
+  gt() |>
   tab_spanner(
     label = "Tukey test",
-    columns = 2:4)%>%
+    columns = 2:4) |>
     tab_source_note(source_note = "Note: Different lowercase letter within the 
                   same row indicates significant differences based on Tukey's 
                   multiple comparisons (p-value < 0.05, n = 18). '-' represents 
                   features with unequal variance according to Levene's test. 
                   'ns' are the features that do not have statistical 
-                  differences (p-value > 0.05) according to the ANOVA test.")
+                  differences (p-value > 0.05) according to the ANOVA test.") |>
+  tab_options(table.width = px(750)) |>
+  as_raw_html()
 tk_table_spl
 
 ```
