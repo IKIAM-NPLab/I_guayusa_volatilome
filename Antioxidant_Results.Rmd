@@ -1,0 +1,440 @@
+---
+title: "Effect of age and light on the antioxidant activity of *Ilex guayusa* leaves - Statistical analysis"
+author: "Jefferson Pastuña"
+date: "2025-01-31"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+usethis::git_vaccinate()
+
+```
+
+# Introduction
+
+This R Script aims to record the procedure for analyzing the antioxidant activity of *Ilex guayusa* leaves under different age and light conditions. Each step has a brief explanation, as well as code and graphics.
+
+The logistic model proposed by [Study of the DPPH-scavenging activity: Development of a free software for the correct interpretation of data](https://doi.org/10.1016/j.foodchem.2008.10.035) was used to interpret the antioxidant activity result of *Ilex guayusa* leaves. We do not use the logistic model to calculate the IC50. However, we use the logistic model (multivariable logistic model) to understand the relationship between age-light factors and antioxidant activity.
+
+# Data preprocessing
+
+## Linearity
+
+Before the data analysis, we checked the linear relationship between the sample concentration and the antioxidant activity (measured as an inhibition percentage). We verified the linear relationship between the sample concentration and the antioxidant activity because we required verification that the sample concentration did not interfere with the independent variables (age and light factor). Also, the logistic regression assumes the linearity of independent variables and log odds of the dependent variable.
+
+First, we loaded the data to R.
+
+```{r data, echo=TRUE}
+
+# Installing readxl package
+#install.packages("readxl")
+# Loading readxl package
+library("readxl")
+# Loading antioxidant data
+abts <- read_excel("Data/Antioxidant_data/Antioxidant_to_R.xlsx",
+                   sheet = "ABTS_data")
+# Change character variables as factor variables
+abts$Analysis_day <- as.factor(abts$Analysis_day)
+abts$Location <- as.factor(abts$Location)
+abts$Age <- as.factor(abts$Age)
+abts$Light <- as.factor(abts$Light)
+# Loading dplyr package
+library(dplyr)
+# Visual inspection of data
+glimpse(abts)
+
+```
+
+Then, we use the glm function to fit generalized linear models.
+
+```{r, echo=TRUE}
+
+# Build the model
+abts_concentration <- glm(formula = Inhibition_persentage ~ Concentration,
+                          data = abts,
+                          family = quasibinomial(logit))
+
+```
+
+Summary of the model.
+
+```{r, echo=TRUE}
+
+# Summary of the model
+summary(abts_concentration)
+
+```
+
+The slope (m = 0.0059967) showed that the antioxidant activity increased with the sample concentration, and this increase is significant (p-value <2e-16). We plot the model using the following line code.
+
+```{r, echo=TRUE}
+
+# Installing sjPlot package
+#install.packages("sjPlot")
+# Loading sjPlot package
+library(sjPlot)
+# Plot of the model
+concentration_plot <-
+  plot_model(abts_concentration, type = "pred", terms = "Concentration",
+             #show.data = TRUE, jitter = 0.01,
+             title = "Predicted probabilities of inhibition persentage",
+             axis.title = c("Concentration", "Inhibition persentage"))
+concentration_plot
+
+```
+
+The next step will be to confirm the linearity between the sample concentration and the antioxidant activity.
+
+```{r, echo=FALSE, results='asis'}
+
+# Use polynomial degrees
+abts_conc_pol2 <- glm(formula = Inhibition_persentage ~ poly(Concentration, 2),
+                      data = abts,
+                      family = quasibinomial(logit))
+abts_conc_pol3 <- glm(formula = Inhibition_persentage ~ poly(Concentration, 3),
+                      data = abts,
+                      family = quasibinomial(logit))
+abts_conc_pol4 <- glm(formula = Inhibition_persentage ~ poly(Concentration, 4),
+                      data = abts,
+                      family = quasibinomial(logit))
+# Display degrees
+concentration_models <- tab_model(abts_conc_pol4)
+concentration_models
+
+```
+
+The results showed that the sample concentration and the antioxidant activity could not have a linear relationship. The result showed that the linear (p-value <0.001) and polynomial grade 2 (p-value <0.001) models fit the data better.
+
+## Collinearity
+
+Before the data analysis, we also check the collinearity of the whole data. We use the glm function to fit generalized linear models with all variables (age, light, location, and analysis day). The analysis day (due to the extended samples, the analysis of antioxidant activity takes several days) was included to inspect the collinearity with other variables.
+
+```{r, echo=TRUE}
+
+# Build the model
+abts_all <- glm(formula = Inhibition_persentage ~ Location + Age + Light +
+                  Analysis_day,
+                data = abts,
+                family = quasibinomial(logit))
+
+```
+
+The following code helps us to check all model assumptions visually.
+
+```{r, echo=TRUE, fig.width = 8, fig.height = 6}
+
+# Installing performance package
+#install.packages("performance")
+# Loading performance package
+library(performance)
+# Check all model assumptions visually
+abts_check <- check_model(abts_all)
+abts_check
+
+```
+
+We can observe that all residuals are in the error bands. The influential observations plot showed the absence of outliers, the collinearity plot showed the colinear relationship between analysis day and location factor, and the "normality of residuals" plot showed that the data do not have a normal distribution. Due to the collinearity between the analysis day and the location factor, we exclude the location factor from the analysis.
+
+# Data analysis
+
+After data preprocessing, the age and light factors are the suitable variables for use in the multivariable logistic regression. Again, we use the glm function to fit generalized linear models with age and light factors.
+
+```{r, echo=TRUE}
+
+# Build the model
+abts_m <- glm(formula = Inhibition_persentage ~ Age + Light,
+              data = abts,
+              family = quasibinomial(logit))
+
+```
+
+## Model assumptions
+
+The following code helps us to check all model assumptions visually.
+
+```{r, echo=TRUE, fig.width = 8, fig.height = 6}
+
+# Check all model assumptions visually
+abts_m_check <- check_model(abts_m)
+abts_m_check
+
+```
+
+We can observe that all residuals fall within the error bands. The "influential observations" plot shows that the points remain inside the contour lines. The collinearity plot showed that all two variables are not multicollinear, as the variation inflation factor stays below 5. The "normality of residuals" plot could suggest the normal distribution of the data. Since our model's assumptions are satisfied, we can visualize the model results.
+
+## Model results
+
+The following code extracts the prediction (inhibition percentage) for the two study variables.
+
+```{r, echo=TRUE}
+
+# Installing ggeffects package
+#install.packages("ggeffects")
+# Loading ggeffects package
+library(ggeffects)
+# Extract prediction
+abts_m_pred <- ggeffect(abts_m)
+abts_m_pred
+
+```
+
+Plot the results.
+
+```{r, echo=TRUE}
+
+# Library to use "ggsave"
+library(tidyverse)
+# Visualize predictions
+abts_plot <- ggeffect(abts_m) %>%
+  plot(show_title = F, show_x_title = F)  %>%
+  sjPlot::plot_grid()
+# Safe result plot
+ggsave('Result/Antioxidant_Result/ABTS_Result.pdf', plot = abts_plot,
+       width = 8, height = 6, device='pdf', dpi="print")
+ggsave('Result/Antioxidant_Result/ABTS_Result.png', plot = abts_plot,
+       width = 8, height = 6, device='png', dpi="print")
+
+```
+
+Print the result in a table.
+
+```{r, echo=TRUE}
+
+# Installing gtsummary package
+#install.packages("gtsummary")
+# Loading gtsummary package
+library(gtsummary)
+# Display contrasts / post-hocs / pairwise camparisons
+abts_m_table <- tbl_regression(abts_m, exponentiate = TRUE,
+                               add_pairwise_contrasts = TRUE,
+                               contrasts_adjust = "bonferroni",
+                               pairwise_reverse = FALSE,
+                               pvalue_fun = ~style_pvalue(.x, digits = 3)) %>%
+  add_significance_stars(hide_p = F, hide_se = T, hide_ci = F) %>%
+  bold_p()
+abts_m_table
+
+```
+
+Print the equation of logistic regression.
+
+```{r, echo=TRUE}
+
+# Installing equatiomatic package
+#install.packages("equatiomatic")
+# Loading equatiomatic package
+#library(equatiomatic)
+# Produce model equation easily
+extract_eq(abts_m)
+
+```
+
+
+
+
+
+
+
+
+```{r cars}
+
+
+ check_normality(abts_m)
+
+simulate_residuals(abts_m)
+
+check_residuals(abts_m)
+
+# Visual inspection of data
+glimpse(abts)
+
+# Build the model
+abts_m <- glm(formula = Inhibition_persentage ~ Concentration, #Location_factor + Age_factor +
+                #Light_factor + Concentration + Analysis_day,
+              data = abts,
+              family = binomial)
+
+# Installing sjPlot package
+#install.packages("sjPlot")
+
+# Loading sjPlot package
+library(sjPlot)
+
+# Check non-linearity
+summary(abts_m)
+
+plot_model(abts_m, type = "pred", terms = "Concentration")
+
+# Use polynomial degrees
+abts_pol2 <- glm(formula = Inhibition_persentage ~ poly(Concentration, 2),
+              data = abts,
+              family = binomial)
+abts_pol3 <- glm(formula = Inhibition_persentage ~ poly(Concentration, 3),
+              data = abts,
+              family = binomial)
+abts_pol4 <- glm(formula = Inhibition_persentage ~ poly(Concentration, 4),
+              data = abts,
+              family = binomial)
+
+# Compare models
+AIC(abts_m, abts_pol2, abts_pol3, abts_pol4)
+
+# Display degrees
+tab_model(abts_pol4)
+
+# Installing performance package
+#install.packages("performance")
+# Loading performance package
+library(performance)
+
+# Check model assumptions
+check_model(abts_m)
+
+
+abts_m1 <- mgcv::gam(Inhibition_persentage ~ Concentration,
+                            abts, family = quasibinomial)
+plot(abts_m1, all.terms = TRUE)
+
+
+# Check all model assumptions visually
+check_model(abts_m)
+
+
+# Installing lme4 package
+install.packages("lme4",
+                 repos=c("http://lme4.r-forge.r-project.org/repos",
+                         getOption("repos")[["CRAN"]]))
+# Loading lme4 package
+library(lme4)
+# Mixed-effects logistic regression
+antioxidant_m2 <- glmer(Inhibition_persentage ~ Location_factor +
+                          Age_factor + Light_factor + Concentration +
+                          Analysis_day,
+                        abts,
+                        quasibinomial)
+check_model(abts_m)
+
+
+# Installing ggeffects package
+#install.packages("ggeffects")
+# Loading ggeffects package
+library(ggeffects)
+
+
+
+# Extract predictions
+#ggeffect(abts_m)
+
+ggpredict(abts_m)
+
+# Be careful
+predict_response(abts_m, terms = "Concentration [all]")
+
+
+# Visualize predictions
+antioxidant_plot <- ggpredict(abts_m) %>%
+  plot() %>%
+  sjPlot::plot_grid()
+
+
+
+
+
+```
+
+Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+
+# Build the model
+abts_m <- glm(formula = Inhibition_persentage ~ Location_factor + Age_factor +
+                Light_factor + Analysis_day,
+              data = abts,
+              family = quasibinomial)
+# Check model assumptions
+check_model(abts_m)
+
+
+
+```
+
+We observed that Analysis day and location factor have collinearity. We inspect the data again with out location factor.
+
+```{r pressure, echo=FALSE}
+
+# Build the model
+abts_no_location <- glm(formula = Inhibition_persentage ~ Age_factor +
+                          Light_factor + Analysis_day,
+                        data = abts,
+                        family = quasibinomial)
+# Check model assumptions
+check_model(abts_no_location)
+
+
+```
+
+Here description of result.
+
+```{r pressure, echo=FALSE}
+
+# Extract prediction
+ggeffect(abts_no_location)
+
+
+```
+
+Visualization the results by a plot.
+
+```{r pressure, echo=FALSE}
+
+# Library to use "%>%"
+library(dplyr)
+# Library to use "ggsave"
+library(tidyverse)
+# Visualize predictions
+abts_plot <- ggeffect(abts_no_location) %>%
+  plot()  %>%
+  sjPlot::plot_grid()
+# Safe result plot
+ggsave('Result/Antioxidant_Result/ABTS_Result.pdf', plot = abts_plot,
+       width = 8, height = 6, device='pdf', dpi="print")
+ggsave('Result/Antioxidant_Result/ABTS_Result.png', plot = abts_plot,
+       width = 8, height = 6, device='png', dpi="print")
+
+
+```
+
+Visualization the results by a table.
+
+```{r pressure, echo=FALSE}
+
+# Installing gtsummary package
+#install.packages("gtsummary")
+
+# Loading gtsummary package
+library(gtsummary)
+
+# Display contrasts / post-hocs / pairwise camparisons
+abts_table <- tbl_regression(abts_no_location,
+                             exponentiate = TRUE,
+                             add_pairwise_contrasts = TRUE,
+                             contrasts_adjust = "bonferroni",
+                             pairwise_reverse = FALSE,
+                             pvalue_fun = ~style_pvalue(.x, digits = 3)) %>%
+  add_significance_stars(hide_p = F, hide_se = T, hide_ci = F) %>%
+  bold_p()
+abts_table
+
+
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
