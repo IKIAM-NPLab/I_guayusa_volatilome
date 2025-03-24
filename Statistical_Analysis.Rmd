@@ -304,6 +304,9 @@ glog_exprs <- glog_transformation(df = pmp_data@assays@data@listData[[1]],
 # Adding glog transformation to notame MetaboSet
 glog_set <- ppm_noflag
 exprs(glog_set) <- glog_exprs
+# Exporting high-quality data to pathway analysis
+#write_to_excel(glog_set,
+#               "Result/notame_Result/MZmine_glog_set.xlsx")
 
 ```
 
