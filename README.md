@@ -5,8 +5,8 @@ The present document aims to record the procedure given for the statistical anal
 # Analysis Notebooks
 
 - [in-house library](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/in-house_Library.md)
-- [Spectral_deconvolution](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Spectral_Deconvolution.md)
-- [Statistical_analysis](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Spectral_Deconvolution.md)
+- [Spectral deconvolution](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Spectral_Deconvolution.md)
+- [Statistical analysis](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Spectral_Deconvolution.md)
 
 # Useful results
 
