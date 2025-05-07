@@ -95,14 +95,16 @@ Scan Range (amu): 50-500
 # Compound deconvolution
 
 The raw MS data (.qgd) (available in
-[link](Data/in-house_Library/qgd_raw_Files)) were converted to (.abf)
-(available in [link](Data/in-house_Library/abf_raw_Files)) format using
-Reifycs file converter. MS-DIAL 4.9.221218 was used to deconvolute the
-raw spectral data using a pipeline that included peak detection,
-alignment, filtering, and gap filling. Parameters used in MS-DIAL are
-available in (.txt) file
-([link](Data/in-house_Library/MS-DIAL_Parameter/MSDIAL_Parameter.txt))
-and (.med2) file ([link](Data/in-house_Library/MS-DIAL_Parameter))
+[link](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/tree/main/Data/in-house_Library/qgd_raw_Files))
+were converted to (.abf) (available in
+[link](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/tree/main/Data/in-house_Library/abf_raw_Files))
+format using Reifycs file converter. MS-DIAL 4.9.221218 was used to
+deconvolute the raw spectral data using a pipeline that included peak
+detection, alignment, filtering, and gap filling. Parameters used in
+MS-DIAL are available in (.txt) file
+([link](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Data/in-house_Library/MS-DIAL_Parameter/MSDIAL_Parameter.txt))
+and (.med2) file
+([link](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/tree/main/Data/in-house_Library/MS-DIAL_Parameter))
 (direct load in MS-DIAL). Deconvoluted compound retention time (RT) and
 retention index (RI) are shown in **Table 2**.
 
@@ -159,11 +161,11 @@ The RI of n-Alkanes was calculated using an R Script (available in
 runs) as a reference for the rest. The RI of the other compounds was
 automatically calculated by MS-DIAL (using the RT of n-Alkanes,
 available in (.txt) format to direct load in MS-DIAL,
-[link](Data/in-house_Library/abf_raw_Files/Batch_05112024) of batch
-05/11/2024, and
-[link](Data/in-house_Library/abf_raw_Files/Batch_20112024) of batch
-20/11/2024) and reported as the average of three runs (one run for each
-concentration: 1 ppm, five ppm, and eight ppm).
+[link](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/tree/main/Data/in-house_Library/abf_raw_Files/Batch_05112024)
+of batch 05/11/2024, and
+[link](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/tree/main/Data/in-house_Library/abf_raw_Files/Batch_20112024)
+of batch 20/11/2024) and reported as the average of three runs (one run
+for each concentration: 1 ppm, five ppm, and eight ppm).
 
 # Library assembly
 
@@ -194,7 +196,7 @@ identification.
 according to MS-DIAL library.
 
 The final library can be downloaded at the following link:
-[IKIAM_NPL_GCMS_Lib_2MSDIAL.msp](Result/in-house_Library_Result/IKIAM_NPL_GCMS_Lib_2MSDIAL.msp)
+[IKIAM_NPL_GCMS_Lib_2MSDIAL.msp](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Result/in-house_Library_Result/IKIAM_NPL_GCMS_Lib_2MSDIAL.msp)
 
 ## Library to NIST MS Search
 
@@ -226,4 +228,4 @@ NIST MS Search software.
 
 The library to use in the NIST MS Search software can be downloaded at
 the following link:
-[IKIAM_NPL_GCMS_Lib](Result/in-house_Library_Result/IKIAM_NPL_GCMS_Lib.zip)
+[IKIAM_NPL_GCMS_Lib](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Result/in-house_Library_Result/IKIAM_NPL_GCMS_Lib.zip)
