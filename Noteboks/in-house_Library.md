@@ -170,8 +170,8 @@ concentration: 1 ppm, five ppm, and eight ppm).
 All deconvoluted compounds (**Table 2**) were exported to MS-FINDER ver.
 3.60, as seen in **Figure 1**.
 
-![Figure
-1](E:/Denice/I_guayusa_volatilome/Data/in-house_Library/ScreenCapture/MSFINDER_Export.jpg)
+![](ScreenCapture/MSFINDER_Export.jpg)
+
 **Figure 1.** Deconvoluted compound exportation from MS-DIAL to
 MS-FINDER.
 
@@ -180,9 +180,8 @@ MS-DIAL, as seen in **Figure 2**. After adding metadata of all
 compounds, we can export in (.msp) format to the posterior edition
 (**Figure 2**).
 
-![](E:/Denice/I_guayusa_volatilome/Data/in-house_Library/ScreenCapture/MSFINDER_Edition.jpg)
-**Figure 2.** Use of MS-FINDER to add metadata to the compounds
-deconvoluted in MS-DIAL.
+![](ScreenCapture/MSFINDER_Edition.jpg) **Figure 2.** Use of MS-FINDER
+to add metadata to the compounds deconvoluted in MS-DIAL.
 
 ## Library to MS-DIAL
 
@@ -191,8 +190,8 @@ to MS-DIAL key names of the compounds metadata, as seen in **Figure 3**.
 After that, the (.msp) library is ready to use in MS-DIAL for compound
 identification.
 
-![](E:/Denice/I_guayusa_volatilome/Data/in-house_Library/ScreenCapture/MSFINDER_msp_files.jpg)
-**Figure 3.** Library edition according to MS-DIAL library.
+![](ScreenCapture/MSFINDER_msp_files.jpg) **Figure 3.** Library edition
+according to MS-DIAL library.
 
 The final library can be downloaded at the following link:
 [IKIAM_NPL_GCMS_Lib_2MSDIAL.msp](Result/in-house_Library_Result/IKIAM_NPL_GCMS_Lib_2MSDIAL.msp)
@@ -202,16 +201,14 @@ The final library can be downloaded at the following link:
 The last edited library (.msp) was loaded in the NIST MS Search 2.4
 software, as seen in **Figure 4**.
 
-![](E:/Denice/I_guayusa_volatilome/Data/in-house_Library/ScreenCapture/NIST_Data_Load.jpg)
-**Figure 4.** Authentic compounds spectra data loading in NIST MS
-Search.
+![](ScreenCapture/NIST_Data_Load.jpg) **Figure 4.** Authentic compounds
+spectra data loading in NIST MS Search.
 
 In the “Librarian” window of NIST MS Search software, compound by
 compound was added to a user NIST library, as seen in **Figure 5**.
 
-![](E:/Denice/I_guayusa_volatilome/Data/in-house_Library/ScreenCapture/NIST_add_compund.jpg)
-**Figure 5.** Registering of authentic compound spectra data in a user
-NIST library.
+![](ScreenCapture/NIST_add_compund.jpg) **Figure 5.** Registering of
+authentic compound spectra data in a user NIST library.
 
 After all compounds were added to the user NIST library, the created
 library is available in the NIST “library Search Options” window
@@ -220,7 +217,7 @@ identification in the NIST MS Search software.
 
 <center>
 
-![](E:/Denice/I_guayusa_volatilome/Data/in-house_Library/ScreenCapture/User_NIST_Library.jpg)
+![](ScreenCapture/User_NIST_Library.jpg)
 
 </center>
 
