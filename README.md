@@ -4,17 +4,17 @@ The present document aims to record the procedure given for the statistical anal
 
 # Analysis Notebooks
 
-- [GC-EI-(Q)MS in-house library](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/in-house_Library.md)
-- [GC-EI-(Q)MS spectral deconvolution](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Spectral_Deconvolution.md)
+- [GC-MS in-house library](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/in-house_Library.md)
+- [GC-MS spectral deconvolution](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Spectral_Deconvolution.md)
 - [Statistical analysis](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Spectral_Deconvolution.md)
 
 # Useful results
 
 ## PCA analysis
 
-- GC-(Q)MS
+- GC-EI-(Q)MS
 
-
+![PCA analysis](Result/notame_Result/figure_1_glog.png)
 
 ## Heatmaps and HCA
 
