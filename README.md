@@ -16,7 +16,8 @@ The present document aims to record the procedure given for the statistical anal
 
 ![PCA analysis](Result/notame_Result/figure_1_glog.png)
 
-## Heatmaps and HCA
+## Heatmaps with HCA and Volcano plot
 
+Heatmap of the annotated features and Volcano plot of all feature table.
 
-## Volcano plot
+![Heatmap](Result/notame_Result/Figure_2.png)
