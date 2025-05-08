@@ -176,3 +176,29 @@ figure_two <- ggpubr::as_ggplot(figure_2) +
 #      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
 
 
+# UpSet plot
+
+# Loading
+library(ComplexHeatmap)
+library("readxl")
+library(ggplot2)
+# xls files
+upset_data <- read_excel("Data/Dec_Software_UpSet_plot.xlsx")
+# Make the combination matrix
+comb_mat = make_comb_mat(upset_data)
+# Plot UpSet
+png(file="Result/UpSet_pot.png", width = 7, height = 3.5, units = "in", res= 300)
+upset_plot <- UpSet(comb_mat,
+                    row_names_gp = gpar(fontsize = 10),
+                    top_annotation = upset_top_annotation(comb_mat,
+                                                          gp = gpar(fill = "#F8766D",
+                                                                    col = "#F8766D"),
+                                                          add_numbers = TRUE,
+                                                          annotation_name_rot = 90,),
+                    right_annotation = upset_right_annotation(comb_mat,
+                                                              gp = gpar(fill = "#1C6AA8",
+                                                                        col = "#1C6AA8"),
+                                                              add_numbers = TRUE))
+draw(upset_plot)
+dev.off()
+
