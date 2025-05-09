@@ -198,7 +198,11 @@ upset_plot <- UpSet(comb_mat,
                     right_annotation = upset_right_annotation(comb_mat,
                                                               gp = gpar(fill = "#1C6AA8",
                                                                         col = "#1C6AA8"),
-                                                              add_numbers = TRUE))
+                                                              add_numbers = TRUE),
+                    set_order = c("MZmine",
+                                  "MS-DIAL",
+                                  "eRah",
+                                  "MSHub"))
 draw(upset_plot)
 dev.off()
 
