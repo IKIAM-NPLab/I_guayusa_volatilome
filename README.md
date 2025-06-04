@@ -6,7 +6,7 @@ The present document aims to record the procedure given for the statistical anal
 
 - [GC-MS in-house library](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/in-house_Library.md)
 - [GC-MS spectral deconvolution](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Spectral_Deconvolution.md)
-- [Statistical analysis](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Spectral_Deconvolution.md)
+- [Statistical analysis](https://github.com/IKIAM-NPLab/I_guayusa_volatilome/blob/main/Noteboks/Statistical_Analysis.md)
 
 # Useful results
 
