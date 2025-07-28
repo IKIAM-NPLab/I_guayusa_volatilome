@@ -56,7 +56,7 @@ Then, a primary path and a log system were added to have a record of each proces
 # Main path
 ppath <- "../I_guayusa_volatilome/"
 # Log system
-init_log(log_file = paste0(ppath, "Result/notame_Result/GCMS_log.txt"))
+init_log(log_file = paste0(ppath, "../Result/notame_Result/GCMS_log.txt"))
 
 ```
 
@@ -64,8 +64,8 @@ Next, the MZmine feature list in "notame" format was loaded.
 
 ```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
-data <- read_from_excel(file = "Data/Data_to_notame/MZmine_Feature_List_2Notame.xlsx", sheet = 3, 
-                        corner_row = 8, corner_column = "N", 
+data <- read_from_excel(file = "../Data/Data_to_notame/MZmine_Feature_List_2Notame.xlsx",
+                        sheet = 3, corner_row = 8, corner_column = "N", 
                         split_by = c("Column", "Ion mode"))
 
 ```
@@ -1555,6 +1555,145 @@ figure_s1f
 # Save plot
 #ggsave('Result/notame_Result/figure_s1f.pdf',
 #       width = 5, height = 4, device='pdf', dpi="print")
+
+```
+
+## PERMANOVA analysis
+
+To statistically evaluate the PCA results, a permutational multivariate analysis of variance (PERMANOVA) was conducted.
+
+### Light factor PERMANOVA
+
+PERMANOVA result at the individual sample level.
+
+```{r echo=TRUE}
+
+# Removal of the subQC group from the dataset
+permanova_set <- glog_set[, glog_set$Analysis_group != "Sub_Quality_Control"]
+pData(permanova_set) <- droplevels(pData(permanova_set))
+# PERMANOVA result
+perform_permanova(drop_qcs(permanova_set), group = "Light_factor", nperm = 999)
+
+```
+
+PERMANOVA result of the subQCs sample.
+
+```{r echo=TRUE}
+
+# Removal of the sample group from the dataset
+permanova_subqc <- glog_set[, glog_set$Analysis_group != "Sample"]
+pData(permanova_subqc) <- droplevels(pData(permanova_subqc))
+# Extracting the Light subQC dataset
+permanova_subqc_light <- permanova_subqc[, permanova_subqc$Light_factor != "Other factor"]
+pData(permanova_subqc_light) <- droplevels(pData(permanova_subqc_light))
+# PERMANOVA result
+perform_permanova(drop_qcs(permanova_subqc_light), group = "Light_factor", nperm = 999)
+
+```
+
+### Age factor PERMANOVA
+
+PERMANOVA result at the individual sample level.
+
+```{r echo=TRUE}
+
+# PERMANOVA result
+perform_permanova(drop_qcs(permanova_set), group = "Age_factor", nperm = 999)
+
+```
+
+PERMANOVA result of the subQCs sample.
+
+```{r echo=TRUE}
+
+# Extracting the Light subQC dataset
+permanova_subqc_age <- permanova_subqc[, permanova_subqc$Age_factor != "Other factor"]
+pData(permanova_subqc_age) <- droplevels(pData(permanova_subqc_age))
+# PERMANOVA result
+perform_permanova(drop_qcs(permanova_subqc_age), group = "Age_factor", nperm = 999)
+
+```
+
+### Location factor PERMANOVA
+
+PERMANOVA result at the individual sample level.
+
+```{r echo=TRUE}
+
+# PERMANOVA result
+perform_permanova(drop_qcs(permanova_set), group = "Location_factor", nperm = 999)
+
+```
+
+PERMANOVA result of the subQCs sample.
+
+```{r echo=TRUE}
+
+# Extracting the Light subQC dataset
+permanova_subqc_location <- permanova_subqc[, permanova_subqc$Location_factor != "Other factor"]
+pData(permanova_subqc_location) <- droplevels(pData(permanova_subqc_location))
+# PERMANOVA result
+perform_permanova(drop_qcs(permanova_subqc_location), group = "Location_factor", nperm = 999)
+
+```
+
+### Alto Pano location PERMANOVA
+
+PERMANOVA result of light factor.
+
+```{r echo=TRUE}
+
+# PERMANOVA result
+perform_permanova(drop_qcs(b_data), group = "Light_factor", nperm = 999)
+
+```
+
+PERMANOVA result of age factor.
+
+```{r echo=TRUE}
+
+# PERMANOVA result
+perform_permanova(drop_qcs(b_data), group = "Age_factor", nperm = 999)
+
+```
+
+### Alto Tena location PERMANOVA
+
+PERMANOVA result of light factor.
+
+```{r echo=TRUE}
+
+# PERMANOVA result
+perform_permanova(drop_qcs(c_data), group = "Light_factor", nperm = 999)
+
+```
+
+PERMANOVA result of age factor.
+
+```{r echo=TRUE}
+
+# PERMANOVA result
+perform_permanova(drop_qcs(c_data), group = "Age_factor", nperm = 999)
+
+```
+
+### Talag location PERMANOVA
+
+PERMANOVA result of light factor.
+
+```{r echo=TRUE}
+
+# PERMANOVA result
+perform_permanova(drop_qcs(a_data), group = "Light_factor", nperm = 999)
+
+```
+
+PERMANOVA result of age factor.
+
+```{r echo=TRUE}
+
+# PERMANOVA result
+perform_permanova(drop_qcs(a_data), group = "Age_factor", nperm = 999)
 
 ```
 
