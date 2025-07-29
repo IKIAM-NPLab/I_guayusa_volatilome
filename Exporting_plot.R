@@ -166,14 +166,14 @@ figure_two <- ggpubr::as_ggplot(figure_2) +
                   x = c(0, 0.5),
                   y = c(.99, .99))
 # Exporting (*.pdf) file
-#ggsave(filename = "Result/notame_Result/figure_2.pdf", plot = figure_two,
+#ggsave(filename = "Result/notame_Result/figure_2_FDR.pdf", plot = figure_two,
 #      width = 175, height = 155, units = "mm", dpi = 300, scale = 2.5)
 # Exporting (*.png) file
-#ggsave(filename = "Result/notame_Result/figure_2.png", plot = figure_two,
+#ggsave(filename = "Result/notame_Result/figure_2_FDR.png", plot = figure_two,
 #      width = 175, height = 155, units = "mm", dpi = 300, scale = 2.5)
 # Exporting (*.jpg) file
-#ggsave(filename = "Result/notame_Result/figure_2.jpg", plot = figure_two,
-#      width = 175, height = 120, units = "mm", dpi = 300, scale = 2.5)
+#ggsave(filename = "Result/notame_Result/figure_2_FDR.jpg", plot = figure_two,
+#       width = 175, height = 155, units = "mm", dpi = 300, scale = 2.5)
 
 
 # UpSet plot

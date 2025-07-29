@@ -384,7 +384,7 @@ volc_t <- perform_t_test(volc_glog,
 # Adding the fold change to the t-test data
 volc_data <- left_join(volc_t, volc_fc)
 # Log-transform for visualization
-volc_data$logP <- -log10(volc_data$Light_vs_Shade_t_test_P)
+volc_data$logP <- -log10(volc_data$Light_vs_Shade_t_test_P_FDR)
 volc_data$log2_fc <- log2(volc_data$Shade_vs_Light_FC)
 
 ```
@@ -396,18 +396,18 @@ Volcano plot of SubQC.
 # Determine point colors based on significance and fold change
 volc_data <- volc_data %>%
   mutate(point_color = case_when(
-    Light_vs_Shade_t_test_P < 0.05 & log2_fc < -1 ~ "Down", # significantly down
-    Light_vs_Shade_t_test_P < 0.05 & log2_fc > 1 ~ "Up",    # significantly up
+    Light_vs_Shade_t_test_P_FDR < 0.05 & log2_fc < -1 ~ "Down", # significantly down
+    Light_vs_Shade_t_test_P_FDR < 0.05 & log2_fc > 1 ~ "Up",    # significantly up
     log2_fc < 1 & log2_fc > -1 ~ "No fold change",          # fold change < 2
-    Light_vs_Shade_t_test_P > 0.05 & log2_fc < -1 | 
-      Light_vs_Shade_t_test_P > 0.05 & log2_fc > 1 ~ "Fold change")) # fold change > 2
+    Light_vs_Shade_t_test_P_FDR > 0.05 & log2_fc < -1 | 
+      Light_vs_Shade_t_test_P_FDR > 0.05 & log2_fc > 1 ~ "Fold change")) # fold change > 2
 # Extracting feature identified
 metab_data <- glog_set[!is.na(glog_set@featureData@data$Metabolite),]
 # Extracting metabolite table
 meta_table <- metab_data@featureData@data
 # Creating a new small table of the annotated compounds
 # Keep metabolites with p-value < 0.05
-volc_compouds <- subset(volc_data, Light_vs_Shade_t_test_P < 0.05 |
+volc_compouds <- subset(volc_data, Light_vs_Shade_t_test_P_FDR < 0.05 |
                              point_color == "Fold change")
 volc_compouds <- left_join(meta_table, volc_compouds)
 # Volcano plot
@@ -491,10 +491,10 @@ sp_volc_th <-
 sp_volc_glog <- join_fData(sp_volc_glog, sp_volc_th)
 # Extracting features with equal variance
 sp_volc_ttset <-
-  sp_volc_glog[sp_volc_glog@featureData@data$Levene_P > 0.05,]
+  sp_volc_glog[sp_volc_glog@featureData@data$Levene_P_FDR > 0.05,]
 # Extracting features with unequal variance
 sp_volc_wttset <-
-  sp_volc_glog[sp_volc_glog@featureData@data$Levene_P < 0.05,]
+  sp_volc_glog[sp_volc_glog@featureData@data$Levene_P_FDR < 0.05,]
 
 ```
 
@@ -525,7 +525,7 @@ sp_volc_t <- rbind(sp_volc_tt, sp_volc_wtt)
 # Adding the fold change to statistical results
 sp_volc_data <- left_join(sp_volc_t, sp_volc_fc)
 # Log-transform for visualization
-sp_volc_data$logP <- -log10(sp_volc_data$Light_vs_Shade_t_test_P)
+sp_volc_data$logP <- -log10(sp_volc_data$Light_vs_Shade_t_test_P_FDR)
 sp_volc_data$log2_fc <- log2(sp_volc_data$Shade_vs_Light_FC)
 
 ```
@@ -537,14 +537,14 @@ Volcano plot of Sample.
 # Determine point colors based on significance and fold change
 sp_volc_data <- sp_volc_data %>%
   mutate(point_color = case_when(
-    Light_vs_Shade_t_test_P < 0.05 & log2_fc < -1 ~ "Down", # significantly down
-    Light_vs_Shade_t_test_P < 0.05 & log2_fc > 1 ~ "Up",    # significantly up
+    Light_vs_Shade_t_test_P_FDR < 0.05 & log2_fc < -1 ~ "Down", # significantly down
+    Light_vs_Shade_t_test_P_FDR < 0.05 & log2_fc > 1 ~ "Up",    # significantly up
     log2_fc < 1 & log2_fc > -1 ~ "No fold change",          # fold change < 2
-    Light_vs_Shade_t_test_P > 0.05 & log2_fc < -1 | 
-      Light_vs_Shade_t_test_P > 0.05 & log2_fc > 1 ~ "Fold change")) # fold change > 2
+    Light_vs_Shade_t_test_P_FDR > 0.05 & log2_fc < -1 | 
+      Light_vs_Shade_t_test_P_FDR > 0.05 & log2_fc > 1 ~ "Fold change")) # fold change > 2
 # Creating a new small table of the annotated compounds
 # Keep metabolites with p-value < 0.05
-sp_volc_compouds <- subset(sp_volc_data, Light_vs_Shade_t_test_P < 0.05 |
+sp_volc_compouds <- subset(sp_volc_data, Light_vs_Shade_t_test_P_FDR < 0.05 |
                              point_color == "Fold change")
 sp_volc_compouds <- left_join(meta_table, sp_volc_compouds)
 # Volcano plot
@@ -656,13 +656,13 @@ tk_bar_res <-
                                  formula_char = "Feature ~ Age_factor")
 # Adding a description of the p-value
 tk_bar_res <- tk_bar_res %>%
-  mutate(bartlett_group = ifelse(Levene_P > 0.05,
+  mutate(bartlett_group = ifelse(Levene_P_FDR > 0.05,
                                  "equal variance",
                                  "unequal variance"))
 
 ```
 
-Most metabolites showed equality of variances according to the Bartlett test. The next step will be the ANOVA test.
+All metabolites showed equality of variances according to the Levene's test. The next step will be the ANOVA test.
 
 ```{r echo=TRUE, message=TRUE, warning=FALSE, error=FALSE}
 
@@ -719,6 +719,8 @@ Merge all results and add a flag in the Tukey result column: "-" for metabolites
 # Merge all results obtained in the Tukey test
 tk_result <- left_join(tk_bar_res, tk_anova_res)
 tk_result <- left_join(tk_result, tk_res)
+tk_result$nstk <- paste(tk_result$tk_group_early, tk_result$tk_group_late,
+                        tk_result$tk_group_medium, sep = "")
 # Flag metabolites
 for(i in 1:78) {
   # Flag "-" metabolites that has unequal variance
@@ -726,14 +728,15 @@ for(i in 1:78) {
 		tk_result$tk_group_early[i] <- "-"
 		tk_result$tk_group_medium[i] <- "-"
 		tk_result$tk_group_late[i] <- "-"
-  }
+		}
   # Flag "ns" metabolites not significant
   if (tk_result$anova_group[i] == "Not Significant" &
-      tk_result$bartlett_group[i] == "equal variance") {
+      tk_result$bartlett_group[i] == "equal variance" |
+      tk_result$nstk[i] == "aaa"){
 		tk_result$tk_group_early[i] <- "ns"
 		tk_result$tk_group_medium[i] <- "ns"
 		tk_result$tk_group_late[i] <- "ns"
-}
+		}
  tk_result
 }
 
