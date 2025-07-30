@@ -586,10 +586,10 @@ sp_vc_plot <- ggplot(sp_volc_data, aes(log2_fc, logP)) +
   geom_hline(yintercept = -log10(0.05), linetype = "longdash", colour="gray")
 sp_vc_plot
 # Save plot
-#ggsave(filename = "Result/notame_Result/Figure_s5.pdf", plot = sp_vc_plot,
-#       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
-#ggsave(filename = "Result/notame_Result/Figure_s5.png", plot = sp_vc_plot,
-#       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
+ggsave(filename = "../Result/notame_Result/Figure_s5_FDR.pdf", plot = sp_vc_plot,
+       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
+ggsave(filename = "../Result/notame_Result/Figure_s5_FDR.png", plot = sp_vc_plot,
+       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
 
 ```
 
@@ -1923,10 +1923,10 @@ gcms_hm <- plot_grid(gg_legend_fn,
                      rel_heights = c(0.045, 0.880))
 gcms_hm
 # Save heatmap plot
-#ggsave(filename = "Result/notame_Result/Figure_2a.pdf", plot = gcms_hm,
-#       width = 7, height = 10, units = "in", dpi = 300, scale = 1.7)
-#ggsave(filename = "Result/notame_Result/Figure_2a.png", plot = gcms_hm,
-#       width = 7, height = 10, units = "in", dpi = 300, scale = 1.7)
+#ggsave(filename = "../Result/notame_Result/Figure_s6.pdf", plot = gcms_hm,
+#       width = 8, height = 10, units = "in", dpi = 300, scale = 1.7)
+#ggsave(filename = "../Result/notame_Result/Figure_s6.png", plot = gcms_hm,
+#       width = 8, height = 10, units = "in", dpi = 300, scale = 1.7)
 
 ```
 

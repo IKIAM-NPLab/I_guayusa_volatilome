@@ -5287,3 +5287,26 @@ INFO [2025-07-29 10:49:56] Starting ANOVA tests.
 INFO [2025-07-29 10:49:56] ANOVA performed.
 INFO [2025-07-29 11:14:30] Starting homoscedasticity tests.
 INFO [2025-07-29 11:14:31] Homoscedasticity tests performed.
+INFO [2025-07-29 20:12:31] Starting homoscedasticity tests.
+INFO [2025-07-29 20:12:31] Homoscedasticity tests performed.
+INFO [2025-07-29 20:12:48] Starting homoscedasticity tests.
+INFO [2025-07-29 20:13:06] Homoscedasticity tests performed.
+INFO [2025-07-29 20:13:09] Starting homoscedasticity tests.
+INFO [2025-07-29 20:13:26] Homoscedasticity tests performed.
+INFO [2025-07-29 20:13:33] Starting to compute fold changes.
+INFO [2025-07-29 20:13:34] Fold changes computed.
+INFO [2025-07-29 20:13:34] Starting t-tests for Light & Shade
+INFO [2025-07-29 20:13:42] Starting to compute fold changes.
+INFO [2025-07-29 20:13:42] Fold changes computed.
+INFO [2025-07-29 20:13:43] Starting t-tests for Light & Shade
+INFO [2025-07-29 20:14:15] Starting to compute fold changes.
+INFO [2025-07-29 20:14:16] Fold changes computed.
+INFO [2025-07-29 20:14:16] Starting t-tests for Light & Shade
+INFO [2025-07-29 20:14:33] Starting homoscedasticity tests.
+INFO [2025-07-29 20:14:51] Homoscedasticity tests performed.
+INFO [2025-07-29 20:14:55] Starting to compute fold changes.
+INFO [2025-07-29 20:14:56] Fold changes computed.
+INFO [2025-07-29 20:14:56] Starting t-tests for Light & Shade
+INFO [2025-07-29 20:15:03] t-tests performed.
+INFO [2025-07-29 20:15:03] Starting t-tests for Light & Shade
+INFO [2025-07-29 20:15:03] t-tests performed.
