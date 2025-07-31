@@ -396,11 +396,11 @@ Volcano plot of SubQC.
 # Determine point colors based on significance and fold change
 volc_data <- volc_data %>%
   mutate(point_color = case_when(
-    Light_vs_Shade_t_test_P_FDR < 0.05 & log2_fc < -1 ~ "Down", # significantly down
-    Light_vs_Shade_t_test_P_FDR < 0.05 & log2_fc > 1 ~ "Up",    # significantly up
+    Light_vs_Shade_t_test_P_FDR < 0.05 & log2_fc <= -1 ~ "Down", # significantly down
+    Light_vs_Shade_t_test_P_FDR < 0.05 & log2_fc >= 1 ~ "Up",    # significantly up
     log2_fc < 1 & log2_fc > -1 ~ "No fold change",          # fold change < 2
-    Light_vs_Shade_t_test_P_FDR > 0.05 & log2_fc < -1 | 
-      Light_vs_Shade_t_test_P_FDR > 0.05 & log2_fc > 1 ~ "Fold change")) # fold change > 2
+    Light_vs_Shade_t_test_P_FDR >= 0.05 & log2_fc <= -1 | 
+      Light_vs_Shade_t_test_P_FDR >= 0.05 & log2_fc >= 1 ~ "Fold change")) # fold change > 2
 # Extracting feature identified
 metab_data <- glog_set[!is.na(glog_set@featureData@data$Metabolite),]
 # Extracting metabolite table
@@ -586,10 +586,10 @@ sp_vc_plot <- ggplot(sp_volc_data, aes(log2_fc, logP)) +
   geom_hline(yintercept = -log10(0.05), linetype = "longdash", colour="gray")
 sp_vc_plot
 # Save plot
-ggsave(filename = "../Result/notame_Result/Figure_s5_FDR.pdf", plot = sp_vc_plot,
-       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
-ggsave(filename = "../Result/notame_Result/Figure_s5_FDR.png", plot = sp_vc_plot,
-       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
+#ggsave(filename = "../Result/notame_Result/Figure_s5_FDR.pdf", plot = sp_vc_plot,
+#       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
+#ggsave(filename = "../Result/notame_Result/Figure_s5_FDR.png", plot = sp_vc_plot,
+#       width = 6, height = 5.4, units = "in", dpi = 300, scale = 1.7)
 
 ```
 
