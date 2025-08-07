@@ -20,4 +20,4 @@ The present document aims to record the procedure given for the statistical anal
 
 Heatmap of the annotated features and Volcano plot of all feature table.
 
-![Heatmap](Result/notame_Result/Figure_2.png)
+![Heatmap](Result/notame_Result/figure_2_FDR.png)
